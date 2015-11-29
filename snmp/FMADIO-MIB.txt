@@ -1,0 +1,768 @@
+FMADIO-MIB DEFINITIONS ::= BEGIN
+
+    IMPORTS
+        MODULE-IDENTITY, OBJECT-TYPE, OBJECT-IDENTITY,
+        NOTIFICATION-TYPE, enterprises, Counter32,
+        Integer32, TimeTicks                   FROM SNMPv2-SMI
+
+        TEXTUAL-CONVENTION, DisplayString      FROM SNMPv2-TC
+
+        MODULE-COMPLIANCE, OBJECT-GROUP,
+        NOTIFICATION-GROUP                     FROM SNMPv2-CONF;
+
+--  Remote Network Monitoring MIB
+
+fmadioMibModule MODULE-IDENTITY
+    LAST-UPDATED "201511200000Z"  -- 20 Nov, 2015
+    ORGANIZATION "fmad engineering"
+    CONTACT-INFO
+        " Email: support at fmad dot io"
+    DESCRIPTION
+        "Packet capture device Device monitoring"
+
+    REVISION "201511200000Z"    -- 20 Nov, 2015 
+    DESCRIPTION
+        "Initial version"
+
+    ::= { conformance  20 }
+
+    fmadio    OBJECT IDENTIFIER ::= { enterprises 31337 }
+
+    -- textual conventions
+
+OwnerString ::= TEXTUAL-CONVENTION
+    STATUS current
+    DESCRIPTION
+        "fmadio packet capture remote monitoring" 
+    SYNTAX OCTET STRING (SIZE (0..127))
+
+EntryStatus ::= TEXTUAL-CONVENTION
+    STATUS current
+    DESCRIPTION
+        "The status of a table entry."
+
+    SYNTAX INTEGER {
+               valid(1),
+               createRequest(2),
+               underCreation(3),
+               invalid(4)
+           }
+
+    system           OBJECT IDENTIFIER ::= { fmadio 1 }
+    interface        OBJECT IDENTIFIER ::= { fmadio 2 }
+    storage          OBJECT IDENTIFIER ::= { fmadio 3 }
+    alert            OBJECT IDENTIFIER ::= { fmadio 4 }
+    conformance      OBJECT IDENTIFIER ::= { fmadio 6 }
+    test             OBJECT IDENTIFIER ::= { fmadio 9 }
+
+----------------------------------------------------------------------------------------------------
+--
+-- System monitoring 
+--
+
+fmadioSystem OBJECT-TYPE
+    SYNTAX     FmadioSystem
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "System level stastitics "
+    ::= { system 1 }
+
+
+FmadioSystem ::= SEQUENCE {
+    systemPacketReceived               Counter64,
+    systemPacketDropped                Counter64,
+    systemPacketErrors                 Counter64,
+    systemPacketCapture                Counter64,
+
+	systemBytesCached                  Counter64,	
+	systemBytesDisk                    Counter64,	
+	systemBytesCapture                 Counter64,	
+	systemBytesOverflow                Counter64,	
+
+	systemSmartError                   Counter64,
+	systemRaidStatus                   OwnerString,
+	systemStreamError                  Counter64,
+	systemChunkError                   Counter64,
+	systemECCError                     Counter64,
+	systemCaptureStatus                OBJECT IDENTIFIER,
+	systemCaptureName                  OBJECT IDENTIFIER
+	systemCaptureBps                   Counter64, 
+	systemCapturePps                   Counter64, 
+	systemCaptureTCPBps                Counter64, 
+	systemCaptureUDPBps                Counter64, 
+}
+
+
+systemPacketReceived OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of packets recevied since power on"
+    ::= { fmadioSystem 1 }
+
+systemPacketDropped OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of packets droppedsince power on"
+    ::= { fmadioSystem 2 }
+
+systemPacketErrors OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of packets errors encoutned"
+    ::= { fmadioSystem 3 }
+
+systemPacketCapture OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of packets captured"
+    ::= { fmadioSystem 4 }
+
+
+
+systemBytesCached OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of bytes in the cache"
+    ::= { fmadioSystem 5 }
+
+systemBytesDisk OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of bytes written to disk"
+    ::= { fmadioSystem 6 }
+
+systemBytesCapture OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of bytes captured"
+    ::= { fmadioSystem 7 }
+
+systemBytesOverflow OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of bytes overflowed from the cache (dropped)"
+    ::= { fmadioSystem 8 }
+
+
+
+systemSmartError OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number new smart errors"
+    ::= { fmadioSystem 9 }
+
+systemRaidStatus OBJECT-TYPE
+    SYNTAX     OwnerString 
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Current RAID system Status"
+    ::= { fmadioSystem 10 }
+
+systemStreamError OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number Stream Errors found during maintence cycles"
+    ::= { fmadioSystem 11 }
+
+systemChunkError OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number Chunk Errors found during maintence cycles"
+    ::= { fmadioSystem 12 }
+
+systemECCError OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number ECC RAM Errors found since power on"
+    ::= { fmadioSystem 13 }
+
+systemCaptureStatus OBJECT-TYPE
+    SYNTAX     OwnerString 
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Current capture status"
+    ::= { fmadioSystem 14 }
+
+systemCaptureName OBJECT-TYPE
+    SYNTAX     OwnerString 
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "file name of the current capture"
+    ::= { fmadioSystem 15 }
+
+
+systemCaptureBps OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Current capture rate in Bits Per Seccond"
+    ::= { fmadioSystem 16 }
+
+systemCapturePps OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Current capture rate in Packets Per Seccond"
+    ::= { fmadioSystem 17 }
+
+systemCaptureTCPBps OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Current TCP only capture rate in Bits Per Seccond"
+    ::= { fmadioSystem 18 }
+
+
+systemCaptureUDPBps OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Current UDP only capture rate in Bits Per Seccond"
+    ::= { fmadioSystem 19 }
+
+
+----------------------------------------------------------------------------------------------------
+--
+-- Interface port stastitics 
+--
+portStatsTable OBJECT-TYPE
+    SYNTAX     SEQUENCE OF PortEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A list of ethernet interfaces"
+    ::= { interface 1 }
+
+fmadioPortEntry OBJECT-TYPE
+    SYNTAX     PortEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A collection of statistics kept for a particular
+        Ethernet interface.  As an example, an instance of the
+        etherStatsPkts object might be named etherStatsPkts.1"
+    INDEX { etherStatsIndex }
+    ::= { portStatsTable 1 }
+
+PortEntry ::= SEQUENCE {
+    etherStatsDataSource               OBJECT IDENTIFIER,
+    etherStatsDropEvents               Counter64,
+    etherStatsOctets                   Counter64,
+    etherStatsPkts                     Counter64,
+    etherStatsBroadcastPkts            Counter64,
+    etherStatsMulticastPkts            Counter64,
+    etherStatsCRCAlignErrors           Counter64,
+    etherStatsUndersizePkts            Counter64,
+    etherStatsOversizePkts             Counter64,
+    etherStatsFragments                Counter64,
+    etherStatsJabbers                  Counter64,
+    etherStatsCollisions               Counter64,
+    etherStatsPkts64Octets             Counter64,
+    etherStatsPkts65to127Octets        Counter64,
+    etherStatsPkts128to255Octets       Counter64,
+    etherStatsPkts256to511Octets       Counter64,
+    etherStatsPkts512to1023Octets      Counter64,
+    etherStatsPkts1024to1518Octets     Counter64,
+    etherStatsPkts1024to16384Octets    Counter64,
+    etherStatsOwner                    OwnerString,
+    etherStatsStatus                   EntryStatus
+}
+
+etherStatsIndex OBJECT-TYPE
+    SYNTAX     Integer32 (1..65535)
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The value of this object uniquely identifies this
+        etherStats entry."
+    ::= { fmadioPortEntry 1 }
+
+etherStatsDataSource OBJECT-TYPE
+    SYNTAX OCTET STRING (SIZE (0..127))
+    MAX-ACCESS read-create
+    STATUS     current
+    DESCRIPTION
+        "This object identifies the source of the data that
+        this etherStats entry is configured to analyze.  This
+        source can be any ethernet interface on this device.
+        In order to identify a particular interface, this object
+        shall identify the instance of the ifIndex object,
+        defined in RFC 2233 [17], for the desired interface.
+        For example, if an entry were to receive data from
+        interface #1, this object would be set to ifIndex.1.
+
+        The statistics in this group reflect all packets
+        on the local network segment attached to the identified
+        interface.
+
+        An agent may or may not be able to tell if fundamental
+        changes to the media of the interface have occurred and
+        necessitate an invalidation of this entry.  For example, a
+        hot-pluggable ethernet card could be pulled out and replaced
+        by a token-ring card.  In such a case, if the agent has such
+        knowledge of the change, it is recommended that it
+        invalidate this entry.
+
+        This object may not be modified if the associated
+        etherStatsStatus object is equal to valid(1)."
+    ::= { fmadioPortEntry 1 }
+
+etherStatsDropEvents OBJECT-TYPE
+    SYNTAX     Counter64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of events in which packets
+        were dropped by the probe due to lack of resources.
+        Note that this number is not necessarily the number of
+        packets dropped; it is just the number of times this
+        condition has been detected."
+    ::= { fmadioPortEntry 2 }
+
+etherStatsOctets OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Octets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of octets of data (including
+        those in bad packets) received on the
+        network (excluding framing bits but including
+        FCS octets).
+
+        This object can be used as a reasonable estimate of
+        10-Megabit ethernet utilization.  If greater precision is
+        desired, the etherStatsPkts and etherStatsOctets objects
+        should be sampled before and after a common interval.  The
+        differences in the sampled values are Pkts and Octets,
+        respectively, and the number of seconds in the interval is
+        Interval.  These values are used to calculate the Utilization
+        as follows:
+
+                         Pkts * (9.6 + 6.4) + (Octets * .8)
+         Utilization = -------------------------------------
+                                 Interval * 10,000
+
+        The result of this equation is the value Utilization which
+        is the percent utilization of the ethernet segment on a
+        scale of 0 to 100 percent."
+    ::= { fmadioPortEntry 3 }
+
+etherStatsPkts OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets (including bad packets,
+        broadcast packets, and multicast packets) received."
+    ::= { fmadioPortEntry 4 }
+
+etherStatsBroadcastPkts OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of good packets received that were
+        directed to the broadcast address.  Note that this
+        does not include multicast packets."
+    ::= { fmadioPortEntry 5 }
+
+etherStatsMulticastPkts OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of good packets received that were
+        directed to a multicast address.  Note that this number
+        does not include packets directed to the broadcast
+
+        address."
+    ::= { fmadioPortEntry 6 }
+
+etherStatsCRCAlignErrors OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets received that
+        had a length (excluding framing bits, but
+        including FCS octets) of between 64 and 1518
+        octets, inclusive, but had either a bad
+        Frame Check Sequence (FCS) with an integral
+        number of octets (FCS Error) or a bad FCS with
+        a non-integral number of octets (Alignment Error)."
+    ::= { fmadioPortEntry 7 }
+
+etherStatsUndersizePkts OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets received that were
+        less than 64 octets long (excluding framing bits,
+        but including FCS octets) and were otherwise well
+        formed."
+    ::= { fmadioPortEntry 8 }
+
+etherStatsOversizePkts OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets received that were
+        longer than 1518 octets (excluding framing bits,
+        but including FCS octets) and were otherwise
+        well formed."
+    ::= { fmadioPortEntry 9 }
+
+etherStatsFragments OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets received that were less than
+        64 octets in length (excluding framing bits but including
+        FCS octets) and had either a bad Frame Check Sequence
+        (FCS) with an integral number of octets (FCS Error) or a
+        bad FCS with a non-integral number of octets (Alignment
+        Error).
+
+        Note that it is entirely normal for etherStatsFragments to
+        increment.  This is because it counts both runts (which are
+        normal occurrences due to collisions) and noise hits."
+    ::= { fmadioPortEntry 10 }
+
+etherStatsJabbers OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets received that were
+        longer than 1518 octets (excluding framing bits,
+        but including FCS octets), and had either a bad
+        Frame Check Sequence (FCS) with an integral number
+        of octets (FCS Error) or a bad FCS with a non-integral
+        number of octets (Alignment Error).
+
+        Note that this definition of jabber is different
+        than the definition in IEEE-802.3 section 8.2.1.5
+        (10BASE5) and section 10.3.1.4 (10BASE2).  These
+        documents define jabber as the condition where any
+        packet exceeds 20 ms.  The allowed range to detect
+        jabber is between 20 ms and 150 ms."
+    ::= { fmadioPortEntry 11 }
+
+etherStatsCollisions OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Collisions"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The best estimate of the total number of collisions
+        on this Ethernet segment.
+
+        The value returned will depend on the location of the
+        RMON probe. Section 8.2.1.3 (10BASE-5) and section
+        10.3.1.3 (10BASE-2) of IEEE standard 802.3 states that a
+        station must detect a collision, in the receive mode, if
+        three or more stations are transmitting simultaneously.  A
+        repeater port must detect a collision when two or more
+
+        stations are transmitting simultaneously.  Thus a probe
+        placed on a repeater port could record more collisions
+        than a probe connected to a station on the same segment
+        would.
+
+        Probe location plays a much smaller role when considering
+        10BASE-T.  14.2.1.4 (10BASE-T) of IEEE standard 802.3
+        defines a collision as the simultaneous presence of signals
+        on the DO and RD circuits (transmitting and receiving
+        at the same time).  A 10BASE-T station can only detect
+        collisions when it is transmitting.  Thus probes placed on
+        a station and a repeater, should report the same number of
+        collisions.
+
+        Note also that an RMON probe inside a repeater should
+        ideally report collisions between the repeater and one or
+        more other hosts (transmit collisions as defined by IEEE
+        802.3k) plus receiver collisions observed on any coax
+        segments to which the repeater is connected."
+    ::= { fmadioPortEntry 12 }
+
+etherStatsPkts64Octets OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets (including bad
+        packets) received that were 64 octets in length
+        (excluding framing bits but including FCS octets)."
+    ::= { fmadioPortEntry 13 }
+
+etherStatsPkts65to127Octets OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets (including bad
+        packets) received that were between
+        65 and 127 octets in length inclusive
+        (excluding framing bits but including FCS octets)."
+    ::= { fmadioPortEntry 14 }
+
+etherStatsPkts128to255Octets OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets (including bad
+        packets) received that were between
+        128 and 255 octets in length inclusive
+        (excluding framing bits but including FCS octets)."
+    ::= { fmadioPortEntry 15 }
+
+etherStatsPkts256to511Octets OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets (including bad
+        packets) received that were between
+        256 and 511 octets in length inclusive
+        (excluding framing bits but including FCS octets)."
+    ::= { fmadioPortEntry 16 }
+
+etherStatsPkts512to1023Octets OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets (including bad
+        packets) received that were between
+        512 and 1023 octets in length inclusive
+        (excluding framing bits but including FCS octets)."
+    ::= { fmadioPortEntry 17 }
+
+etherStatsPkts1024to1518Octets OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets (including bad
+        packets) received that were between
+        1024 and 1518 octets in length inclusive
+        (excluding framing bits but including FCS octets)."
+    ::= { fmadioPortEntry 18 }
+
+etherStatsPkts1024to16384ctets OBJECT-TYPE
+    SYNTAX     Counter64
+    UNITS      "Packets"
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "The total number of packets (including bad
+        packets) received that were between
+        1024 and 1518 octets in length inclusive
+        (excluding framing bits but including FCS octets)."
+    ::= { fmadioPortEntry 19 }
+
+etherStatsLinkStatus OBJECT-TYPE
+    SYNTAX     OwnerString
+    MAX-ACCESS read-create
+    STATUS     current
+    DESCRIPTION
+        "capture port link status"
+    ::= { fmadioPortEntry 20 }
+
+etherStatsTransciverLink OBJECT-TYPE
+    SYNTAX     OwnerString
+    MAX-ACCESS read-create
+    STATUS     current
+    DESCRIPTION
+        "transciver link mode SR/LR/ER"
+    ::= { fmadioPortEntry 21 }
+
+etherStatsTransciverWavelength OBJECT-TYPE
+    SYNTAX     OwnerString
+    MAX-ACCESS read-create
+    STATUS     current
+    DESCRIPTION
+        "transciver link wavelength"
+    ::= { fmadioPortEntry 22 }
+
+etherStatsTransciverVendor OBJECT-TYPE
+    SYNTAX     OwnerString
+    MAX-ACCESS read-create
+    STATUS     current
+    DESCRIPTION
+        "transciver vendor"
+    ::= { fmadioPortEntry 23 }
+
+
+etherStatsTransciverPartno OBJECT-TYPE
+    SYNTAX     OwnerString
+    MAX-ACCESS read-create
+    STATUS     current
+    DESCRIPTION
+        "transciver part number/serial number"
+    ::= { fmadioPortEntry 24 }
+
+
+
+
+----------------------------------------------------------------------------------------------------
+--
+-- disk status 
+--
+fmadioStorage OBJECT-TYPE
+    SYNTAX     SEQUENCE OF FmadioStorageEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "Disk monitoring"
+    ::= { storage 1 }
+
+fmadioStorageEntry OBJECT-TYPE
+    SYNTAX    StorageEntry 
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A collection of statistics kept for a particular
+        Ethernet interface.  As an example, an instance of the
+        etherStatsPkts object might be named etherStatsPkts.1"
+    INDEX { storageIndex }
+    ::= { fmadioStorage 1 }
+
+
+storageIndex OBJECT-TYPE
+    SYNTAX      INTEGER 
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+    "Storage Index."
+    ::= { fmadioStorageEntry 1 }
+
+
+
+StorageEntry ::= SEQUENCE {
+	storageDiskSerial                  OwnerString,	
+	storageDiskMount                   OwnerString,	
+	storageDiskType                    OwnerString,	
+	storageDiskErrorSMART              Counter64,	
+	storageDiskErrorRead               Counter64,	
+	storageDiskErrorDMA                Counter64,	
+	storageDiskErrorRealloc            Counter64,	
+	storageDiskTemperature             Integer32,	
+}
+
+storageDiskSerial OBJECT-TYPE
+    SYNTAX     OwnerString 
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk serial number"
+    ::= { fmadioStorageEntry 1 }
+
+storageDiskMount OBJECT-TYPE
+    SYNTAX     OwnerString 
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk local mount point"
+    ::= { fmadioStorageEntry 2 }
+
+storageDiskType OBJECT-TYPE
+    SYNTAX     OwnerString 
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "What kind of storage, SSD/HDD/OS/JBOD"
+    ::= { fmadioStorageEntry 3 }
+
+storageDiskErrorSMART OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number SMART errors this disk hasn"
+    ::= { fmadioStorageEntry 4 }
+
+storageDiskErrorRead OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of Read Errors"
+    ::= { fmadioStorageEntry 5 }
+
+storageDiskErrorDMA OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of DMA Errors"
+    ::= { fmadioStorageEntry 6 }
+
+storageDiskErrorRealloc OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Total number of reallocated sectors"
+    ::= { fmadioStorageEntry 7 }
+
+storageDiskTemperature OBJECT-TYPE
+    SYNTAX     Integer64
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Current Disk temperature"
+    ::= { fmadioStorageEntry 8 }
+
+END
