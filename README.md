@@ -26,9 +26,9 @@ Options:
 ## Examples
 
 
-```
 1) Continously download the currently active capture in 1 second PCAP splits
 
+```
 $ ./capture_rsync.py  --follow  --host 192.168.11.95 --split split_1sec
 Follow Mode
 [./py4_20160105_1618_split_1sec/py4_20160105_1618_20160105_16:12:20.211.165.440 ] Downloading...   0.000 GB   0.877 sec    0.000000 Gbps
@@ -46,8 +46,10 @@ Follow Mode
 [./py4_20160105_1618_split_1sec/py4_20160105_1618_20160105_16:19:01.749.243.904 ] Downloading...   0.108 GB   1.268 sec    0.678948 Gbps
 [./py4_20160105_1618_split_1sec/py4_20160105_1618_20160105_16:19:02.749.243.904 ] Downloading...   0.113 GB   1.512 sec    0.596313 Gbps
 
+```
 2) Show the Split options for the currently active capture 
 
+```
 aaron@fpga:~/lln/github/fmadio_scripts$ ./capture_rsync.py  --splitlist
 Split Modes:
   split_1sec
@@ -64,11 +66,14 @@ Split Modes:
   split_100GB
   split_1TB
 
+```
 3) Show List of captures on the FMADIO device at 192.168.1.1 with Username "fmadio" and Password "secret"
 
+```
 $ ./capture_rsync.py  --list --host 192.168.1.1 --user fmadio --pass secret 
 Capture List
   py4_20160105_1618
   py3_20160105_1611
   py2_20160105_1603
 
+```
