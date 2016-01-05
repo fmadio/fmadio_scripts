@@ -80,6 +80,9 @@ Capture List
 
 4) Split and Apply Filtering
 
+
+Note: When filters are applied, downloaded files are always overwritten. 
+
 ```
 
 $ ./capture_rsync.py  --host 192.168.12.10 --output fmadio20 --filter FilterIPHost=192.168.1.0/24 --follow
@@ -112,6 +115,5 @@ FilterHTTPS=true
 FilterDNS=true
 FilterICMP=true
 FilterIGMP=true
-
 ```
 
