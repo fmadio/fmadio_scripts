@@ -22,8 +22,9 @@ OUTDIR				= "./"
 SPLIT_MODE			= "split_1min"
 
 CaptureName			= None
-ShowSplitList		= False
-ShowCaptureList 	= False 
+ShowSplitList		= False				# show the split options for the specified capture
+ShowCaptureList 	= False 			# show the list of captures on the device
+IsFollow			= False				# poll / follow mode
 
 #-------------------------------------------------------------------------------------------------------------
 def Help():
