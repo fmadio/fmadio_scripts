@@ -80,20 +80,7 @@ Capture List
 
 4) Split and Apply Filtering
 
-Filter options are
-
 ```
-FilterIPSrc=1.2.3.4/32
-FilterIPDst=1.2.3.4/32
-FilterIPHost=1.2.3.4/32
-FilterTCP=true
-FilterUDP=true
-FilterTCPPort=1234
-FilterUDPPort=1234
-
-FilterHTTP=true
-FilterHTTPS=true
-FilterDNS=true
 
 $ ./capture_rsync.py  --host 192.168.12.10 --output fmadio20 --filter FilterIPHost=192.168.1.0/24 --follow
 Follow Mode
@@ -108,3 +95,23 @@ Sleeping...
 Sleeping...
 
 ```
+
+Filter options are
+
+```
+FilterIPSrc=1.2.3.4/32
+FilterIPDst=1.2.3.4/32
+FilterIPHost=1.2.3.4/32
+FilterTCP=true
+FilterUDP=true
+FilterTCPPort=1234
+FilterUDPPort=1234
+
+FilterHTTP=true
+FilterHTTPS=true
+FilterDNS=true
+FilterICMP=true
+FilterIGMP=true
+
+```
+
