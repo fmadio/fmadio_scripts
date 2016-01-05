@@ -14,7 +14,7 @@ import time
 import fmadio 
 
 fmadio.USERNAME		= "fmadio"
-fmadio.PASSWORD		= "100g"
+fmadio.PASSWORD		= "secret"
 fmadio.PROTOCOL		= "http"
 fmadio.HOSTNAME		= "192.168.11.95"
 fmadio.CURL			= "/usr/bin/curl"
@@ -23,6 +23,7 @@ SPLIT_MODE			= "split_1min"
 
 CaptureName			= None
 ShowSplitList		= False
+ShowCaptureList 	= False 
 
 #-------------------------------------------------------------------------------------------------------------
 def Help():
@@ -37,6 +38,7 @@ def Help():
 	print(" --output <dir>              : output directory (default ./)") 
 	print(" --splitmode <splitmode>     : select split mode (default 1min)") 
 	print(" --splitlist                 : show split options") 
+	print(" --list                      : show all captures on the remote machine") 
 
 	sys.exit(0)
 
@@ -78,6 +80,10 @@ while (i < len(sys.argv)):
 	if (arg == "--splitlist"):
 		ShowSplitList = True
 
+	if (arg == "--list"):
+		ShowCaptureList = True
+
+
 	if (arg == "--help"):
 		Help()
 
@@ -92,6 +98,14 @@ CaptureList 		= fmadio.StreamList()
 if (len(CaptureList) == 0):
 	print("No captures or bad username/password/hostname/etc")
 	sys.exit(0)
+
+if (ShowCaptureList == True):
+
+	print("Capture List")
+	for Capture in CaptureList:
+		print("   " + Capture["Name"])	
+	sys.exit(0)
+		
 
 # after a specific capture
 Entry 		= CaptureList[0]

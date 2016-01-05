@@ -13,13 +13,6 @@ import os
 import commands 
 import time 
 
-#SPLIT_MODE	= "1sec"
-#USERNAME	= "fmadio"
-#PASSWORD	= "100g"
-#HOSTNAME	= "192.168.11.95"
-#CURL		= "/usr/bin/curl"
-#OUTDIR		= "/tmp/"
-
 #-------------------------------------------------------------------------------------------------------------
 # issue CURL command
 def CURLCmd( URL, Suffix = "" ):
