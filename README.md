@@ -77,3 +77,34 @@ Capture List
   py2_20160105_1603
 
 ```
+
+4) Split and Apply Filtering
+
+Filter options are
+FilterIPSrc=1.2.3.4/32
+FilterIPDst=1.2.3.4/32
+FilterIPHost=1.2.3.4/32
+FilterTCP=true
+FilterUDP=true
+FilterTCPPort=1234
+FilterUDPPort=1234
+
+Some convience macros
+FilterHTTP=true
+FilterHTTPS=true
+FilterDNS=true
+
+```
+$ ./capture_rsync.py  --host 192.168.12.10 --output fmadio20 --filter FilterIPHost=192.168.1.0/24 --follow
+Follow Mode
+[fmadio20_landata_20160105_2145_split_1GB/landata_20160105_2145__20160105_21:46:14.660.095.232 ] Downloading...   0.264 GB   3.971 sec    0.532612 Gbps
+[fmadio20_landata_20160105_2145_split_1GB/landata_20160105_2145__20160105_21:46:54.697.121.792 ] Downloading...   0.380 GB   7.556 sec    0.402748 Gbps
+[fmadio20_landata_20160105_2145_split_1GB/landata_20160105_2145__20160105_21:47:43.308.749.568 ] Downloading...   0.072 GB   1.186 sec    0.484051 Gbps
+Sleeping...
+[fmadio20_landata_20160105_2145_split_1GB/landata_20160105_2145__20160105_21:48:05.748.449.280 ] Downloading...   0.000 GB   1.226 sec    0.000267 Gbps
+[fmadio20_landata_20160105_2145_split_1GB/landata_20160105_2145__20160105_21:48:24.473.020.672 ] Downloading...   0.000 GB   1.933 sec    0.000176 Gbps
+[fmadio20_landata_20160105_2145_split_1GB/landata_20160105_2145__20160105_21:48:50.867.348.736 ] Downloading...   0.000 GB   1.851 sec    0.000077 Gbps
+[fmadio20_landata_20160105_2145_split_1GB/landata_20160105_2145__20160105_21:49:10.676.263.424 ] Downloading...   0.010 GB   2.225 sec    0.037457 Gbps
+Sleeping...
+
+```
