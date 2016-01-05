@@ -1,6 +1,6 @@
 # fmadio_scripts
 
-**stream_rsync.py**
+### stream_rsync.py
 
 Python script for rsync like capture downloading. Can download from the FMADIO packet capture device in multiple split modes. 
 
@@ -23,7 +23,7 @@ Options:
 
 ```
 
-## Examples
+** Examples **
 
 
 1) Continously download the currently active capture in 1 second PCAP splits
