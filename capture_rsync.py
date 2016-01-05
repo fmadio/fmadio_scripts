@@ -12,14 +12,15 @@ import os
 import sys 
 import time 
 import fmadio 
+import ConfigParser
 
 fmadio.USERNAME		= "fmadio"
 fmadio.PASSWORD		= "secret"
 fmadio.PROTOCOL		= "http"
-fmadio.HOSTNAME		= "192.168.11.95"
+fmadio.HOSTNAME		= "192.168.1.1"
 fmadio.CURL			= "/usr/bin/curl"
 OUTDIR				= "./"
-SPLIT_MODE			= "split_1min"
+SPLIT_MODE			= "split_1GB"
 
 CaptureName			= None
 ShowSplitList		= False				# show the split options for the specified capture
@@ -37,11 +38,33 @@ def Help():
 	print(" --user <username>           : HTTP(s) username") 
 	print(" --pass <password>           : HTTP(s) password") 
 	print(" --output <dir>              : output directory (default ./)") 
-	print(" --splitmode <splitmode>     : select split mode (default 1min)") 
+	print(" --splitmode <splitmode>     : select split mode (default 1GB)") 
 	print(" --splitlist                 : show split options") 
 	print(" --list                      : show all captures on the remote machine") 
 
 	sys.exit(0)
+
+#-------------------------------------------------------------------------------------------------------------
+# system defaults from config file
+try:
+	Config = ConfigParser.ConfigParser()
+	Config.read(os.path.expanduser('~/.fmadio.conf'))
+
+	General = Config.options("General")
+	Map = {}
+	for Option in General:
+		Value 		= Config.get("General", Option)
+		Map[Option] = Value
+
+	# set defaults
+
+	fmadio.USERNAME = Map.get("username", fmadio.USERNAME)
+	fmadio.PASSWORD = Map.get("password", fmadio.PASSWORD)
+	fmadio.HOSTNAME = Map.get("hostname", fmadio.HOSTNAME)
+	fmadio.PROTOCOL = Map.get("protocol", fmadio.PROTOCOL)
+
+except:
+	pass
 
 #-------------------------------------------------------------------------------------------------------------
 # parse args 
