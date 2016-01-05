@@ -81,6 +81,8 @@ Capture List
 4) Split and Apply Filtering
 
 Filter options are
+
+```
 FilterIPSrc=1.2.3.4/32
 FilterIPDst=1.2.3.4/32
 FilterIPHost=1.2.3.4/32
@@ -89,12 +91,10 @@ FilterUDP=true
 FilterTCPPort=1234
 FilterUDPPort=1234
 
-Some convience macros
 FilterHTTP=true
 FilterHTTPS=true
 FilterDNS=true
 
-```
 $ ./capture_rsync.py  --host 192.168.12.10 --output fmadio20 --filter FilterIPHost=192.168.1.0/24 --follow
 Follow Mode
 [fmadio20_landata_20160105_2145_split_1GB/landata_20160105_2145__20160105_21:46:14.660.095.232 ] Downloading...   0.264 GB   3.971 sec    0.532612 Gbps
