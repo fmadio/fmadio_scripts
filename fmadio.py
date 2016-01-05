@@ -160,6 +160,28 @@ def StreamRSync(SplitList, Prefix, ShowGood=True):
 			print " %6.3f sec" % dT,
 			print " %10.6f Gbps" % (Bps / 1e9)
 
+#-------------------------------------------------------------------------------------------------------------
+#  rsync the stream capture files
+def StreamFetch(SplitList, Prefix, FilterArg):
+	for Split in SplitList:
+
+		FileName =  Prefix + '_' + Split["Time"]
+		print "["+FileName+"] Downloading...",
+		sys.stdout.flush()
+		TS0 = time.time()
+
+		URL = Split["URL"] + "&" + FilterArg
+		CURLCmd(URL, ' > "' + FileName + '"') 
+		TS1 = time.time()
+
+		Size = os.path.getsize(FileName)
+		dT = TS1 - TS0
+		Bps = Size * 8 / dT
+		print " %6.3f GB" % (Size / 1e9),
+		print " %6.3f sec" % dT,
+		print " %10.6f Gbps" % (Bps / 1e9)
+
+
 
 #-------------------------------------------------------------------------------------------------------------
 

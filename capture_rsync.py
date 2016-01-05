@@ -26,6 +26,7 @@ CaptureName			= None
 ShowSplitList		= False				# show the split options for the specified capture
 ShowCaptureList 	= False 			# show the list of captures on the device
 IsFollow			= False				# poll / follow mode
+IsFilter			= False				# filter mode
 
 #-------------------------------------------------------------------------------------------------------------
 def Help():
@@ -95,7 +96,7 @@ while (i < len(sys.argv)):
 		i = i + 1
 
 	if (arg == "--output"):
-		OUTDIR = sys.argv[ sys.argv.index(arg) + 1]
+		OUTDIR = sys.argv[ sys.argv.index(arg) + 1] + "_"
 		i = i + 1
 
 	if (arg == "--split"):
@@ -106,7 +107,10 @@ while (i < len(sys.argv)):
 
 	if (arg == "--list"):
 		ShowCaptureList = True
-
+	if (arg == "--filter"):
+		IsFilter = True
+		FilterArg = sys.argv[ sys.argv.index(arg) + 1]
+		i = i + 1
 
 	if (arg == "--help"):
 		Help()
@@ -172,24 +176,67 @@ try:
 except:
 	pass
 
-# now sync it 
+# intelligent rsync mode 
+if (IsFilter == False):
+	ShowGood = True 
+	while True:
 
-ShowGood = True 
-while True:
+		# get current split list
+		SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
 
-	# get current split list
-	SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
+		# rsync stream list to the output dir
+		fmadio.StreamRSync(SplitList, OutputDir+ "/" + Entry["Name"] + "_", ShowGood) 
 
-	# rsync stream list to the output dir
-	fmadio.StreamRSync(SplitList, OutputDir+ "/" + Entry["Name"], ShowGood) 
+		# continoius follow/poll mode ? 
+		if (IsFollow != True):
+			break
 
-	# continoius follow/poll mode ? 
-	if (IsFollow != True):
-		break
+		time.sleep(60)
+		ShowGood = False
 
-	time.sleep(60)
-	ShowGood = False
+	print("RSync complete")
 
-print("RSync complete")
+else:
+# follow mode with filtering requires different code path
+# it requires 
+# 1) to not download the last item 
+# 2) keep a list of already downloaded splits
+		 
+	if (IsFollow == True):
+
+		DownloadList = {} 
+		LastDownload = None
+		while True:
+
+			# get current split list
+			SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
+
+			# dont download last item	
+			LastIndex 	 = len(SplitList) - 1
+			LastDownload = SplitList[ LastIndex ] 
+			SplitList.pop( LastIndex ) 
+
+			# build list of new splits
+			NewList = []	
+			for Split in SplitList:
+				Key = Split["Time"]
+				if (DownloadList.get(Key) == None):
+					DownloadList[Key] = True 
+					NewList.append(Split)
+
+			# rsync stream list to the output dir
+			fmadio.StreamFetch(NewList, OutputDir + "/" + Entry["Name"] + "_", FilterArg) 
+
+			print("Sleeping...")
+			time.sleep(60)
+
+# without follow mode, its very straight forward 
+	else:
+
+		# get current split list
+		SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
+		fmadio.StreamFetch(SplitList, OutputDir + "/" + Entry["Name"] + "_", FilterArg) 
+
+	print("FilterSync complete")
 
 
