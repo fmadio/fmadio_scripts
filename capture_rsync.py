@@ -19,6 +19,7 @@ fmadio.PASSWORD		= "secret"
 fmadio.PROTOCOL		= "http"
 fmadio.HOSTNAME		= "192.168.1.1"
 fmadio.CURL			= "/usr/bin/curl"
+fmadio.VERBOSE		= False 
 OUTDIR				= "./"
 SPLIT_MODE			= "split_1GB"
 
@@ -42,6 +43,7 @@ def Help():
 	print(" --splitmode <splitmode>     : select split mode (default 1GB)") 
 	print(" --splitlist                 : show split options") 
 	print(" --list                      : show all captures on the remote machine") 
+	print(" -v                          : verbose output") 
 
 	sys.exit(0)
 
@@ -74,6 +76,9 @@ while (i < len(sys.argv)):
 	arg = sys.argv[i]
 	i = i + 1
 	if (arg == sys.argv[0]): continue 
+	
+	if (arg == "-v"):
+		fmadio.VERBOSE = True
 
 	if (arg == "--follow"):
 		print("Follow Mode")

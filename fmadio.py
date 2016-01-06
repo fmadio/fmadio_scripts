@@ -18,7 +18,10 @@ import time
 def CURLCmd( URL, Suffix = "" ):
 
 	Cmd 	= CURL + ' -s -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + Suffix
-	#print Cmd
+
+	if (VERBOSE == True):
+		print("\r[%s]\n" % Cmd)
+
 	List 	= commands.getstatusoutput(Cmd)
 
 	#p = subprocess.Popen(shlex.split(Cmd),
