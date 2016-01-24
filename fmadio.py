@@ -15,10 +15,9 @@ import time
 
 #-------------------------------------------------------------------------------------------------------------
 # issue CURL command
-def CURLCmd( URL, Suffix = "" ):
+def CURLCmd( URL, Silent = "-s", Suffix = "" ):
 
-	Cmd 	= CURL + ' -s -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + Suffix
-
+	Cmd 	= CURL + ' ' + Silent + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + Suffix
 	if (VERBOSE == True):
 		print("\r[%s]\n" % Cmd)
 
@@ -127,44 +126,43 @@ def StreamSplit(CaptureName, SplitMode):
 
 #-------------------------------------------------------------------------------------------------------------
 #  rsync the stream capture files
-def StreamRSync(SplitList, Prefix, ShowGood=True, Suffix="", URLArg = ""):
-	for Split in SplitList:
+def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 
-		FileName =  Prefix + '_' + Split["Time"] + Suffix
-		IsDownload = True
-		try:
-			Size = os.path.getsize(FileName)
+	FileName =  Prefix + '_' + Split["Time"] + Suffix
+	IsDownload = True
+	try:
+		Size = os.path.getsize(FileName)
 
-			# NOTE* 2016/01/05
-			#       Split byte count is is in rounded up multiples of 256KB
-			#       Its in 256KB chunks so the file splitter only looks at 
-			#       the metadata. It does NOT load in actual packet data 
-			dSize = Split["Bytes"] - Size
-			if (abs(dSize) <= 256*1024):
-				#print("file good")
-				IsDownload = False
-				if (ShowGood == True):
-					print("["+FileName+"] GOOD skipping")
-		except:
-				IsDownload = True 
+		# NOTE* 2016/01/05
+		#       Split byte count is is in rounded up multiples of 256KB
+		#       Its in 256KB chunks so the file splitter only looks at 
+		#       the metadata. It does NOT load in actual packet data 
+		dSize = Split["Bytes"] - Size
+		if (abs(dSize) <= 256*1024):
+			#print("file good")
+			IsDownload = False
+			if (ShowGood == True):
+				print("["+FileName+"] GOOD skipping")
+	except:
+			IsDownload = True 
 
-		# file requires downloading
-		if (IsDownload == True):
-			print "["+FileName+"] Downloading...",
-			sys.stdout.flush()
-			TS0 = time.time()
+	# file requires downloading
+	if (IsDownload == True):
+		print "["+FileName+"] Downloading...",
+		sys.stdout.flush()
+		TS0 = time.time()
 
-			URL = Split["URL"] + URLArg
+		URL = Split["URL"] + URLArg
 
-			CURLCmd(URL, ' > "' + FileName + '"') 
-			TS1 = time.time()
+		CURLCmd(URL, ' > "' + FileName + '"') 
+		TS1 = time.time()
 
-			Size = os.path.getsize(FileName)
-			dT = TS1 - TS0
-			Bps = Size * 8 / dT
-			print " %6.3f GB" % (Size / 1e9),
-			print " %6.3f sec" % dT,
-			print " %10.6f Gbps" % (Bps / 1e9)
+		Size = os.path.getsize(FileName)
+		dT = TS1 - TS0
+		Bps = Size * 8 / dT
+		print " %6.3f GB" % (Size / 1e9),
+		print " %6.3f sec" % dT,
+		print " %10.6f Gbps" % (Bps / 1e9)
 
 #-------------------------------------------------------------------------------------------------------------
 #  rsync the stream capture files
@@ -187,7 +185,42 @@ def StreamFetch(SplitList, Prefix, FilterArg, Suffix = ""):
 		print " %6.3f sec" % dT,
 		print " %10.6f Gbps" % (Bps / 1e9)
 
+#-------------------------------------------------------------------------------------------------------------
+#  fetch the specific capture as a single file 
+def StreamSingle(StreamName, Prefix, Suffix, StartTime = None, StopTime = None):
 
+	FileName =  Prefix + '/' + StreamName + Suffix 
+	print "["+StreamName+"] Downloading...\n",
+	sys.stdout.flush()
+	TS0 = time.time()
+
+	#http://192.168.11.75/pcap/splittime?StreamName=check1_20160124_1019&Start=1453598396176270592ULL&Stop=1453601996176270592ULL&&
+	URL = ""
+
+	# raw full capture 
+	if (StartTime == None) and (StopTime == None):
+		URL = "/pcap/single?StreamName="+StreamName
+	else:
+		URL = "/pcap/splittime?StreamName=" + StreamName + "&"
+		URL += "Start=%dULL&" % StartTime
+		URL += "Stop=%dULL&" % StopTime 
+
+	if (Suffix == ".pcap.gz"):
+		URL = URL + "&Compression=fast"
+
+	# use os.system so stderr outputs the progress bar
+	Cmd 	= CURL + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + ' > "' + FileName + '"' 
+	print Cmd
+	os.system(Cmd)
+
+	TS1 = time.time()
+
+	Size = os.path.getsize(FileName)
+	dT = TS1 - TS0
+	Bps = Size * 8 / dT
+	print " %6.3f GB" % (Size / 1e9),
+	print " %6.3f sec" % dT,
+	print " %10.6f Gbps" % (Bps / 1e9)
 
 #-------------------------------------------------------------------------------------------------------------
 

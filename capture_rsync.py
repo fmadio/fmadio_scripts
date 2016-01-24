@@ -13,7 +13,9 @@
 import os
 import sys 
 import time 
+import math 
 import fmadio 
+import datetime 
 import ConfigParser
 
 fmadio.USERNAME		= "fmadio"
@@ -32,6 +34,9 @@ IsFollow			= False				# poll / follow mode
 IsFilter			= False				# filter mode
 IsCompressFast		= False				# fast compression mode
 IsCompressMax		= False				# maximum space saving compression mode 
+IsSingleFile		= False				# download entire capture as a single file
+StartTime			= None				# used for time based capture filtering
+StopTime			= None				# used for time based capture filtering
 
 #-------------------------------------------------------------------------------------------------------------
 def Help():
@@ -44,14 +49,45 @@ def Help():
 	print(" --user <username>           : HTTP(s) username") 
 	print(" --pass <password>           : HTTP(s) password") 
 	print(" --output <dir>              : output directory (default ./)") 
+	print(" --single                    : downloads capture as a single PCAP)") 
 	print(" --splitmode <splitmode>     : select split mode (default 1GB)") 
 	print(" --splitlist                 : show split options") 
+	print(" --start <HH:MM:SS>          : start time") 
+	print(" --stop  <HH:MM:SS>          : stop time") 
 	print(" --list                      : show all captures on the remote machine") 
-	print(" --compress                  : compress at the source (fastest)") 
-	print(" --compress-max              : compress at the source (maximum)") 
+	print(" --compress                  : compress at the source (~1Gbps throughput)") 
 	print(" -v                          : verbose output") 
 
 	sys.exit(0)
+
+#-------------------------------------------------------------------------------------------------------------
+# parse time string  (HH:MM:SS -> dic
+def ParseTimeStr(TimeStr):
+
+	s = TimeStr.split(":")
+
+	Hour = float(s[0]);
+	Min  = float(s[1]);
+	Sec  = float(s[2]);
+
+	return (Hour * 60 + Min) * 60 + Sec 
+
+#-------------------------------------------------------------------------------------------------------------
+# checks if Time is within the specified range 
+# string like this 20151013_07:04:51.992.334.336
+def ParseTimeStrSec(TimeStr):
+	
+	s = TimeStr.split("_")
+	p = s[1].split(".")
+	T = p[0].split(":")
+
+	Hour = float(T[0]);
+	Min  = float(T[1]);
+	Sec  = float(T[2]);
+
+	Time = (Hour * 60 + Min)*60 + Sec 
+
+	return Time
 
 #-------------------------------------------------------------------------------------------------------------
 # system defaults from config file
@@ -107,14 +143,18 @@ while (i < len(sys.argv)):
 		i = i + 1
 
 	if (arg == "--output"):
-		OUTDIR = sys.argv[ sys.argv.index(arg) + 1] + "_"
+		OUTDIR = sys.argv[ sys.argv.index(arg) + 1] 
 		i = i + 1
 
 	if (arg == "--split"):
 		SPLIT_MODE = sys.argv[ sys.argv.index(arg) + 1]
 		i = i + 1
+
 	if (arg == "--splitlist"):
 		ShowSplitList = True
+
+	if (arg == "--single"):
+		IsSingleFile = True
 
 	if (arg == "--list"):
 		ShowCaptureList = True
@@ -126,6 +166,16 @@ while (i < len(sys.argv)):
 
 	if (arg == "--compress"):
 		IsCompressFast = True;
+
+	if (arg == "--start"):
+		StartTime = ParseTimeStr( sys.argv[ sys.argv.index(arg) + 1] )
+		i = i + 1
+		IsStartTime = True;
+
+	if (arg == "--stop"):
+		StopTime = ParseTimeStr( sys.argv[ sys.argv.index(arg) + 1] )
+		i = i + 1
+		IsStopTime = True;
 
 	if (arg == "--help"):
 		Help()
@@ -165,7 +215,6 @@ if (CaptureName != None):
 
 # get capture info 
 View 		= fmadio.StreamView( Entry["Name"] )
-
 if (ShowSplitList == True):
 
 	print("Split Modes:")
@@ -173,6 +222,36 @@ if (ShowSplitList == True):
 		print("   "+Mode["Mode"])
 
 	sys.exit(0)
+
+# download as single file
+if (IsSingleFile == True):
+	Suffix = ".pcap"
+	if (IsCompressFast == True):
+		print("Single PCAP Compressed")
+		Suffix = ".pcap.gz"
+	else:
+		print("Single PCAP")
+
+	# calculte timezone with minium number of external deps
+	# local time == (utc time + utc offset)
+	millis 		= 1288483950000
+	ts 			= millis * 1e-3
+	utc_offset 	= datetime.datetime.fromtimestamp(ts) - datetime.datetime.utcfromtimestamp(ts)
+	print("TZ Offset", utc_offset.seconds)
+
+	# convert time into epoch ns 
+
+	TSBase = math.floor(Entry["TS"] / (24*60*60*1e9)) * 24*60*60*1e9
+
+	if (StartTime != None):
+		StartTime = TSBase + StartTime * 1e9 - utc_offset.seconds * 1e9 
+
+	if (StopTime != None):
+		StopTime = TSBase + StopTime * 1e9 - utc_offset.seconds * 1e9 
+
+	# download single pcap 
+	fmadio.StreamSingle(CaptureName, OUTDIR, Suffix, StartTime, StopTime)
+	sys.exit(0);
 
 # find the split mode 
 SplitView = None
@@ -187,7 +266,11 @@ if (SplitView == None):
 
 # make the output directory
 
-OutputDir = OUTDIR + Entry["Name"] + "_" + SPLIT_MODE
+OutputDir = OUTDIR
+if (OUTDIR[-1] != "/"):
+	OutputDir += + "_"
+OutputDir += Entry["Name"] + "_" + SPLIT_MODE
+
 try:
 	os.makedirs(OutputDir)
 except:
@@ -208,12 +291,30 @@ if (IsFilter == False):
 		# get current split list
 		SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
 
-		# rsync stream list to the output dir
-		fmadio.StreamRSync(	SplitList, 
-							OutputDir+ "/" + Entry["Name"] + "_", 
-							ShowGood, 
-							Suffix,
-							URLArg) 
+		# generate numeric time 
+		for Split in SplitList:
+			Split["TimeSec"] = ParseTimeStrSec(Split["Time"])
+
+		for idx,Split in enumerate(SplitList):
+
+			Prefix = OutputDir+ "/" + Entry["Name"] + "_"
+
+			#  filter based on time range (if specified)
+			if (StopTime != None) and (Split["TimeSec"] > StopTime):
+				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StopTime)"
+				continue;
+
+			if (StartTime != None) and (SplitList[idx+1] != None):
+				if (SplitList[idx+1]["TimeSec"] < StartTime):
+					print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StartTime)"
+					continue;
+
+			# rsync stream list to the output dir
+			fmadio.StreamRSync(	Split, 
+								Prefix,	
+								ShowGood, 
+								Suffix,
+								URLArg) 
 
 		# continoius follow/poll mode ? 
 		if (IsFollow != True):
