@@ -4,6 +4,8 @@
 #
 # Change Log:
 #
+# 2016/01/24 : compressed into single file (no external deps) 
+#            : added compress mode + time range modes
 # 2016/01/06 : add verbose mode 
 #            : support compression on download
 # 2016/01/05 : initial version. requires FW 1983+
@@ -14,16 +16,18 @@ import os
 import sys 
 import time 
 import math 
-import fmadio 
+import commands 
 import datetime 
 import ConfigParser
 
-fmadio.USERNAME		= "fmadio"
-fmadio.PASSWORD		= "secret"
-fmadio.PROTOCOL		= "http"
-fmadio.HOSTNAME		= "192.168.1.1"
-fmadio.CURL			= "/usr/bin/curl"
-fmadio.VERBOSE		= False 
+#-------------------------------------------------------------------------------------------------------------
+
+USERNAME			= "fmadio"
+PASSWORD			= "secret"
+PROTOCOL			= "http"
+HOSTNAME			= "192.168.1.1"
+CURL				= "/usr/bin/curl"
+VERBOSE				= False 
 OUTDIR				= "./"
 SPLIT_MODE			= "split_1GB"
 
@@ -39,7 +43,9 @@ StartTime			= None				# used for time based capture filtering
 StopTime			= None				# used for time based capture filtering
 
 #-------------------------------------------------------------------------------------------------------------
+
 def Help():
+
 	print("capture_rsync <capture name> : RSync`s a capture to the local machine")
 	print("")
 	print("Options:")
@@ -59,6 +65,217 @@ def Help():
 	print(" -v                          : verbose output") 
 
 	sys.exit(0)
+
+#######################################################################################################################
+#######################################################################################################################
+
+#-------------------------------------------------------------------------------------------------------------
+# issue CURL command
+def CURLCmd( URL, Silent = "-s", Suffix = "" ):
+
+	Cmd 	= CURL + ' ' + Silent + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + Suffix
+	if (VERBOSE == True):
+		print("\r[%s]\n" % Cmd)
+
+	List 	= commands.getstatusoutput(Cmd)
+
+	#p = subprocess.Popen(shlex.split(Cmd),
+	#	                 stdout=subprocess.PIPE, 
+	#						 stderr=subprocess.PIPE, 
+	#						 stdin=subprocess.PIPE)
+	#Out =  p.communicate()
+
+	#print("stdout", Out[0])
+	#	print("stderr", Out[1])
+	return List[1]
+
+# create a hash of all streams on the device 
+def StreamList():
+	List = [] 
+
+	# get all current acpture streams 
+	Str = CURLCmd("/plain/list")
+	Lines = Str.split("\n")
+	for Line in Lines:
+		L = Line.split(",")
+
+		# ignreo the title header
+		if (len(L) != 8): continue
+		if (L[0].strip() == "Filename"): continue
+
+		# break each line into its components
+
+		Name	 	= L[0].strip()	
+		Bytes		= L[1]
+		Packets		= L[2]
+		Date		= L[3]
+		URL			= L[4]
+		TS			= int(L[6])
+
+		List.append( { "Name": Name, "Bytes":Bytes, "Packets":Packets, "Date":Date, "URL": URL, "TS":TS } )
+		#print FileName
+
+	# return capture list in newest first order 
+	def getkey(item):
+		return item["TS"]
+
+	return sorted(List, key=getkey, reverse=True)
+
+#-------------------------------------------------------------------------------------------------------------
+# create an arrway of all views of the specified stream
+def StreamView(CaptureName):
+
+	List = [] 
+
+	# get all current acpture streams 
+	Str = CURLCmd("/plain/view?StreamName="+CaptureName)
+	Lines = Str.split("\n")
+	for Line in Lines:
+		L = Line.split(",")
+
+		# invalid line 
+		if (len(L) != 2): continue
+		
+		# ignreo the title header
+		if (L[0].strip() == "SplitMode"): continue
+
+		# break each line into its components
+
+		Mode	 	= L[0]	
+		URL			= L[1]
+
+		List.append( { "Mode":Mode, "URL":URL } )
+
+		#print FileName
+
+	return List
+
+#-------------------------------------------------------------------------------------------------------------
+# create list of all pcap`s for a specific view 
+def StreamSplit(CaptureName, SplitMode):
+
+	List = [] 
+
+	# get all current acpture streams 
+	Str = CURLCmd("/plain/split?StreamName="+CaptureName+"&StreamView="+SplitMode)
+	Lines = Str.split("\n")
+	for Line in Lines:
+		L = Line.split(",")
+
+		# invalid line 
+		if (len(L) != 4): continue
+		
+		# ignreo the title header
+		if (L[0].strip() == "Name"): continue
+
+		# break each line into its components
+		Time	 	= L[0].strip()	
+		Bytes		= int(L[1])
+		Packets		= int(L[2])
+		URL			= L[3]
+
+		List.append({ "Time":Time, "Bytes":Bytes, "Packets":Packets, "URL":URL })
+
+		#print FileName
+
+	return List
+
+#-------------------------------------------------------------------------------------------------------------
+#  rsync the stream capture files
+def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
+
+	FileName =  Prefix + '_' + Split["Time"] + Suffix
+	IsDownload = True
+	try:
+		Size = os.path.getsize(FileName)
+
+		# NOTE* 2016/01/05
+		#       Split byte count is is in rounded up multiples of 256KB
+		#       Its in 256KB chunks so the file splitter only looks at 
+		#       the metadata. It does NOT load in actual packet data 
+		dSize = Split["Bytes"] - Size
+		if (abs(dSize) <= 256*1024):
+			#print("file good")
+			IsDownload = False
+			if (ShowGood == True):
+				print("["+FileName+"] GOOD skipping")
+	except:
+			IsDownload = True 
+
+	# file requires downloading
+	if (IsDownload == True):
+		print "["+FileName+"] Downloading...",
+		sys.stdout.flush()
+		TS0 = time.time()
+
+		URL = Split["URL"] + URLArg
+
+		CURLCmd(URL, ' > "' + FileName + '"') 
+		TS1 = time.time()
+
+		Size = os.path.getsize(FileName)
+		dT = TS1 - TS0
+		Bps = Size * 8 / dT
+		print " %6.3f GB" % (Size / 1e9),
+		print " %6.3f sec" % dT,
+		print " %10.6f Gbps" % (Bps / 1e9)
+
+#-------------------------------------------------------------------------------------------------------------
+#  rsync the stream capture files
+def StreamFetch(SplitList, Prefix, FilterArg, Suffix = ""):
+	for Split in SplitList:
+
+		FileName =  Prefix + '_' + Split["Time"] + Suffix
+		print "["+FileName+"] Downloading...",
+		sys.stdout.flush()
+		TS0 = time.time()
+
+		URL = Split["URL"] + "&" + FilterArg
+		CURLCmd(URL, ' > "' + FileName + '"') 
+		TS1 = time.time()
+
+		Size = os.path.getsize(FileName)
+		dT = TS1 - TS0
+		Bps = Size * 8 / dT
+		print " %6.3f GB" % (Size / 1e9),
+		print " %6.3f sec" % dT,
+		print " %10.6f Gbps" % (Bps / 1e9)
+
+#-------------------------------------------------------------------------------------------------------------
+#  fetch the specific capture as a single file 
+def StreamSingle(StreamName, Prefix, Suffix, StartTime = None, StopTime = None):
+
+	FileName =  Prefix + StreamName + Suffix 
+	print "["+StreamName+"] Downloading...\n",
+	sys.stdout.flush()
+	TS0 = time.time()
+
+	#http://192.168.11.75/pcap/splittime?StreamName=check1_20160124_1019&Start=1453598396176270592ULL&Stop=1453601996176270592ULL&&
+	URL = ""
+
+	# raw full capture 
+	if (StartTime == None) and (StopTime == None):
+		URL = "/pcap/single?StreamName="+StreamName
+	else:
+		URL = "/pcap/splittime?StreamName=" + StreamName + "&"
+		URL += "Start=%dULL&" % StartTime
+		URL += "Stop=%dULL&" % StopTime 
+
+	if (Suffix == ".pcap.gz"):
+		URL = URL + "&Compression=fast"
+
+	# use os.system so stderr outputs the progress bar
+	Cmd 	= CURL + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + ' > "' + FileName + '"' 
+	os.system(Cmd)
+
+	TS1 = time.time()
+
+	Size = os.path.getsize(FileName)
+	dT = TS1 - TS0
+	Bps = Size * 8 / dT
+	print " %6.3f GB" % (Size / 1e9),
+	print " %6.3f sec" % dT,
+	print " %10.6f Gbps" % (Bps / 1e9)
 
 #-------------------------------------------------------------------------------------------------------------
 # parse time string  (HH:MM:SS -> dic
@@ -89,6 +306,12 @@ def ParseTimeStrSec(TimeStr):
 
 	return Time
 
+
+#######################################################################################################################
+#######################################################################################################################
+
+# main program
+
 #-------------------------------------------------------------------------------------------------------------
 # system defaults from config file
 try:
@@ -103,10 +326,10 @@ try:
 
 	# set defaults
 
-	fmadio.USERNAME = Map.get("username", fmadio.USERNAME)
-	fmadio.PASSWORD = Map.get("password", fmadio.PASSWORD)
-	fmadio.HOSTNAME = Map.get("hostname", fmadio.HOSTNAME)
-	fmadio.PROTOCOL = Map.get("protocol", fmadio.PROTOCOL)
+	USERNAME = Map.get("username", USERNAME)
+	PASSWORD = Map.get("password", PASSWORD)
+	HOSTNAME = Map.get("hostname", HOSTNAME)
+	PROTOCOL = Map.get("protocol", PROTOCOL)
 
 except:
 	pass
@@ -120,30 +343,44 @@ while (i < len(sys.argv)):
 	if (arg == sys.argv[0]): continue 
 	
 	if (arg == "-v"):
-		fmadio.VERBOSE = True
+		VERBOSE = True
 
 	if (arg == "--follow"):
 		print("Follow Mode")
 		IsFollow = True
 
 	if (arg == "--https"):
-		fmadio.PROTOCOL = "https"	
-		fmadio.CURL     = fmadio.CURL + " --insecure"			# fmadio certficiate is self signed
+		PROTOCOL = "https"	
+		CURL     = CURL + " --insecure"			# fmadio certficiate is self signed
 
 	if (arg == "--host"):
-		fmadio.HOSTNAME = sys.argv[ sys.argv.index(arg) + 1]
+		HOSTNAME = sys.argv[ sys.argv.index(arg) + 1]
 		i = i + 1
 
 	if (arg == "--user"):
-		fmadio.USERNAME = sys.argv[ sys.argv.index(arg) + 1]
+		USERNAME = sys.argv[ sys.argv.index(arg) + 1]
 		i = i + 1
 
 	if (arg == "--pass"):
-		fmadio.PASSWORD = sys.argv[ sys.argv.index(arg) + 1]
+		PASSWORD = sys.argv[ sys.argv.index(arg) + 1]
 		i = i + 1
 
 	if (arg == "--output"):
-		OUTDIR = sys.argv[ sys.argv.index(arg) + 1] 
+		OUT 		= sys.argv[ sys.argv.index(arg) + 1] 
+		OUTNAME 	= ""
+		OUTDIR 		= ""
+		if (OUT[-1] == "/"):
+			OUTDIR = OUT
+		else:
+			Index = 0
+			for j in range(1,len(OUT)): 
+				Index = len(OUT) - j
+				if (OUT[Index] == "/"):
+					break
+
+			OUTDIR 	= OUT[0:Index] + "/"
+			OUTNAME = OUT[Index+1:] + "_"
+
 		i = i + 1
 
 	if (arg == "--split"):
@@ -187,7 +424,7 @@ while (i < len(sys.argv)):
 #-------------------------------------------------------------------------------------------------------------
 
 # get list of streams
-CaptureList 		= fmadio.StreamList()
+CaptureList 		= StreamList()
 if (len(CaptureList) == 0):
 	print("No captures or bad username/password/hostname/etc")
 	sys.exit(0)
@@ -214,7 +451,7 @@ if (CaptureName != None):
 		sys.exit(0)	
 
 # get capture info 
-View 		= fmadio.StreamView( Entry["Name"] )
+View 		= StreamView( Entry["Name"] )
 if (ShowSplitList == True):
 
 	print("Split Modes:")
@@ -237,7 +474,7 @@ if (IsSingleFile == True):
 	millis 		= 1288483950000
 	ts 			= millis * 1e-3
 	utc_offset 	= datetime.datetime.fromtimestamp(ts) - datetime.datetime.utcfromtimestamp(ts)
-	print("TZ Offset", utc_offset.seconds)
+	print("TZ Offset %d Sec" % utc_offset.seconds)
 
 	# convert time into epoch ns 
 
@@ -250,7 +487,7 @@ if (IsSingleFile == True):
 		StopTime = TSBase + StopTime * 1e9 - utc_offset.seconds * 1e9 
 
 	# download single pcap 
-	fmadio.StreamSingle(CaptureName, OUTDIR, Suffix, StartTime, StopTime)
+	StreamSingle(CaptureName, OUTDIR + "/" + OUTNAME, Suffix, StartTime, StopTime)
 	sys.exit(0);
 
 # find the split mode 
@@ -289,7 +526,7 @@ if (IsFilter == False):
 	while True:
 
 		# get current split list
-		SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
+		SplitList 	= StreamSplit( Entry["Name"], SplitView["Mode"])
 
 		# generate numeric time 
 		for Split in SplitList:
@@ -310,7 +547,7 @@ if (IsFilter == False):
 					continue;
 
 			# rsync stream list to the output dir
-			fmadio.StreamRSync(	Split, 
+			StreamRSync(	Split, 
 								Prefix,	
 								ShowGood, 
 								Suffix,
@@ -338,7 +575,7 @@ else:
 		while True:
 
 			# get current split list
-			SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
+			SplitList 	= StreamSplit( Entry["Name"], SplitView["Mode"])
 
 			# dont download last item	
 			LastIndex 	 = len(SplitList) - 1
@@ -354,7 +591,7 @@ else:
 					NewList.append(Split)
 
 			# rsync stream list to the output dir
-			fmadio.StreamFetch(NewList, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
+			StreamFetch(NewList, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
 
 			print("Sleeping...")
 			time.sleep(60)
@@ -363,8 +600,8 @@ else:
 	else:
 
 		# get current split list
-		SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
-		fmadio.StreamFetch(SplitList, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
+		SplitList 	= StreamSplit( Entry["Name"], SplitView["Mode"])
+		StreamFetch(SplitList, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
 
 	print("FilterSync complete")
 
