@@ -4,6 +4,8 @@
 #
 # Change Log:
 #
+# 2016/01/06 : add verbose mode 
+#            : support compression on download
 # 2016/01/05 : initial version. requires FW 1983+
 #
 #-------------------------------------------------------------------------------------------------------------
@@ -28,6 +30,8 @@ ShowSplitList		= False				# show the split options for the specified capture
 ShowCaptureList 	= False 			# show the list of captures on the device
 IsFollow			= False				# poll / follow mode
 IsFilter			= False				# filter mode
+IsCompressFast		= False				# fast compression mode
+IsCompressMax		= False				# maximum space saving compression mode 
 
 #-------------------------------------------------------------------------------------------------------------
 def Help():
@@ -43,6 +47,8 @@ def Help():
 	print(" --splitmode <splitmode>     : select split mode (default 1GB)") 
 	print(" --splitlist                 : show split options") 
 	print(" --list                      : show all captures on the remote machine") 
+	print(" --compress                  : compress at the source (fastest)") 
+	print(" --compress-max              : compress at the source (maximum)") 
 	print(" -v                          : verbose output") 
 
 	sys.exit(0)
@@ -112,10 +118,14 @@ while (i < len(sys.argv)):
 
 	if (arg == "--list"):
 		ShowCaptureList = True
+
 	if (arg == "--filter"):
 		IsFilter = True
 		FilterArg = sys.argv[ sys.argv.index(arg) + 1]
 		i = i + 1
+
+	if (arg == "--compress"):
+		IsCompressFast = True;
 
 	if (arg == "--help"):
 		Help()
@@ -175,11 +185,20 @@ if (SplitView == None):
 	print("Invalid SplitMode ["+SPLIT_MODE+"]. Use --splitlist to show options")
 	sys.exit(0)
 
+# make the output directory
+
 OutputDir = OUTDIR + Entry["Name"] + "_" + SPLIT_MODE
 try:
 	os.makedirs(OutputDir)
 except:
 	pass
+
+# decide on filename suffix 
+URLArg = ""
+Suffix = ".pcap"
+if (IsCompressFast == True) or (IsCompressMax == True):
+	Suffix = ".pcap.gz"
+	URLArg = "&Compression=fast"
 
 # intelligent rsync mode 
 if (IsFilter == False):
@@ -190,7 +209,11 @@ if (IsFilter == False):
 		SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
 
 		# rsync stream list to the output dir
-		fmadio.StreamRSync(SplitList, OutputDir+ "/" + Entry["Name"] + "_", ShowGood) 
+		fmadio.StreamRSync(	SplitList, 
+							OutputDir+ "/" + Entry["Name"] + "_", 
+							ShowGood, 
+							Suffix,
+							URLArg) 
 
 		# continoius follow/poll mode ? 
 		if (IsFollow != True):
@@ -230,7 +253,7 @@ else:
 					NewList.append(Split)
 
 			# rsync stream list to the output dir
-			fmadio.StreamFetch(NewList, OutputDir + "/" + Entry["Name"] + "_", FilterArg) 
+			fmadio.StreamFetch(NewList, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
 
 			print("Sleeping...")
 			time.sleep(60)
@@ -240,7 +263,7 @@ else:
 
 		# get current split list
 		SplitList 	= fmadio.StreamSplit( Entry["Name"], SplitView["Mode"])
-		fmadio.StreamFetch(SplitList, OutputDir + "/" + Entry["Name"] + "_", FilterArg) 
+		fmadio.StreamFetch(SplitList, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
 
 	print("FilterSync complete")
 

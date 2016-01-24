@@ -114,7 +114,7 @@ def StreamSplit(CaptureName, SplitMode):
 		if (L[0].strip() == "Name"): continue
 
 		# break each line into its components
-		Time	 	= L[0]	
+		Time	 	= L[0].strip()	
 		Bytes		= int(L[1])
 		Packets		= int(L[2])
 		URL			= L[3]
@@ -127,10 +127,10 @@ def StreamSplit(CaptureName, SplitMode):
 
 #-------------------------------------------------------------------------------------------------------------
 #  rsync the stream capture files
-def StreamRSync(SplitList, Prefix, ShowGood=True):
+def StreamRSync(SplitList, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 	for Split in SplitList:
 
-		FileName =  Prefix + '_' + Split["Time"]
+		FileName =  Prefix + '_' + Split["Time"] + Suffix
 		IsDownload = True
 		try:
 			Size = os.path.getsize(FileName)
@@ -153,7 +153,10 @@ def StreamRSync(SplitList, Prefix, ShowGood=True):
 			print "["+FileName+"] Downloading...",
 			sys.stdout.flush()
 			TS0 = time.time()
-			CURLCmd(Split["URL"], ' > "' + FileName + '"') 
+
+			URL = Split["URL"] + URLArg
+
+			CURLCmd(URL, ' > "' + FileName + '"') 
 			TS1 = time.time()
 
 			Size = os.path.getsize(FileName)
@@ -165,10 +168,10 @@ def StreamRSync(SplitList, Prefix, ShowGood=True):
 
 #-------------------------------------------------------------------------------------------------------------
 #  rsync the stream capture files
-def StreamFetch(SplitList, Prefix, FilterArg):
+def StreamFetch(SplitList, Prefix, FilterArg, Suffix = ""):
 	for Split in SplitList:
 
-		FileName =  Prefix + '_' + Split["Time"]
+		FileName =  Prefix + '_' + Split["Time"] + Suffix
 		print "["+FileName+"] Downloading...",
 		sys.stdout.flush()
 		TS0 = time.time()
