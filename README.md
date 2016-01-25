@@ -131,4 +131,45 @@ FilterICMP=true
 FilterIGMP=true
 ```
 
+#### 5) Sync capture with 1GB split with GZip compression 
+
+Note: Compression is perfomred on the capture device. This is best for rsync captures across a low bandwidth WAN connection
+
+```
+$ ./capture_rsync.py  --compress --output /tmp/test remote_basic_1453696518952593920_20160125_1335
+RSync Capture Named [remote_basic_1453696518952593920_20160125_1335]
+[/tmp/remote_basic_1453696518952593920_20160125_1335_split_1GB/remote_basic_1453696518952593920_20160125_1335__20160125_13:35:41.907.941.120.pcap.gz] Downloading...   0.349 GB  13.464 sec    0.207326 Gbps
+[/tmp/remote_basic_1453696518952593920_20160125_1335_split_1GB/remote_basic_1453696518952593920_20160125_1335__20160125_13:35:42.308.264.960.pcap.gz] Downloading...   0.349 GB  14.454 sec    0.193131 Gbps
+[/tmp/remote_basic_1453696518952593920_20160125_1335_split_1GB/remote_basic_1453696518952593920_20160125_1335__20160125_13:35:42.708.495.872.pcap.gz] Downloading...   0.349 GB  13.541 sec    0.206155 Gbps
+[/tmp/remote_basic_1453696518952593920_20160125_1335_split_1GB/remote_basic_1453696518952593920_20160125_1335__20160125_13:35:43.108.719.616.pcap.gz] Downloading...   0.349 GB  12.461 sec    0.224032 Gbps
+[/tmp/remote_basic_1453696518952593920_20160125_1335_split_1GB/remote_basic_1453696518952593920_20160125_1335__20160125_13:35:43.508.950.528.pcap.gz] Downloading...   0.349 GB  13.465 sec    0.207315 Gbps
+[/tmp/remote_basic_1453696518952593920_20160125_1335_split_1GB/remote_basic_1453696518952593920_20160125_1335__20160125_13:35:43.909.181.440.pcap.gz] Downloading...   0.349 GB  14.008 sec    0.199286 Gbps
+[/tmp/remote_basic_1453696518952593920_20160125_1335_split_1GB/remote_basic_1453696518952593920_20160125_1335__20160125_13:35:44.309.412.608.pcap.gz] Downloading...   0.349 GB  13.401 sec    0.208301 Gbps
+```
+
+
+#### 6) Extract Single PCAP with GZip for a specific time range 
+
+
+```
+$ ./capture_rsync.py  --compress --single --start 13:35:45 --stop 13:35:46 --output /tmp/test remote_basic_1453696518952593920_20160125_1335
+RSync Capture Named [remote_basic_1453696518952593920_20160125_1335]
+Single PCAP Compressed
+TZ Offset 32400 Sec
+[remote_basic_1453696518952593920_20160125_1335] Downloading...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  831M    0  831M    0     0  24.3M      0 --:--:--  0:00:34 --:--:-- 19.1M
+
+$ ls -al /tmp
+total 1601972
+drwxrwxrwt  5 root  root      20480  1月 25 14:57 .
+drwxr-xr-x 22 root  root       4096 12月 10 00:21 ..
+-rw-rw-r--  1 aaron aaron 871830615  1月 25 14:57 test_remote_basic_1453696518952593920_20160125_1335.pcap.gz
+$
+```
+
+
+
+
 
