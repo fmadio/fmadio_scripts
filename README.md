@@ -23,10 +23,24 @@ Options:
 
 ```
 
-### Examples ### 
+### Config File
 
+It can be painful and a security risk including the FMADIO hostname + username + password on the command line every time. The scripts load a configuration file located in the home directory named .fmadio.conf 
 
-1) Continously download the currently active capture in 1 second PCAP splits
+An example file looks like this:
+
+```
+$ cat ~/.fmadio.conf
+[General]
+username=fmadio
+password=secret
+hostname=192.168.1.1
+
+```
+
+### Examples
+
+#### 1) Continously download the currently active capture in 1 second PCAP splits
 
 ```
 $ ./capture_rsync.py  --follow  --host 192.168.11.95 --split split_1sec
@@ -47,7 +61,7 @@ Follow Mode
 [./py4_20160105_1618_split_1sec/py4_20160105_1618_20160105_16:19:02.749.243.904 ] Downloading...   0.113 GB   1.512 sec    0.596313 Gbps
 
 ```
-2) Show the Split options for the currently active capture 
+#### 2) Show the Split options for the currently active capture 
 
 ```
 aaron@fpga:~/lln/github/fmadio_scripts$ ./capture_rsync.py  --splitlist
@@ -67,7 +81,7 @@ Split Modes:
   split_1TB
 
 ```
-3) Show List of captures on the FMADIO device at 192.168.1.1 with Username "fmadio" and Password "secret"
+#### 3) Show List of captures on the FMADIO device at 192.168.1.1 with Username "fmadio" and Password "secret"
 
 ```
 $ ./capture_rsync.py  --list --host 192.168.1.1 --user fmadio --pass secret 
@@ -78,7 +92,7 @@ Capture List
 
 ```
 
-4) Split and Apply Filtering
+#### 4) Split and Apply Filtering
 
 
 Note: When filters are applied, downloaded files are always overwritten. 
@@ -117,17 +131,4 @@ FilterICMP=true
 FilterIGMP=true
 ```
 
-### Config Files ### 
 
-It can be painful and a security risk including the FMADIO hostname + username + password on the command line every time. The scripts load a configuration file located in the home directory named .fmadio.conf 
-
-An example file looks like this:
-
-```
-$ cat ~/.fmadio.conf
-[General]
-username=fmadio
-password=secret
-hostname=192.168.1.1
-
-```
