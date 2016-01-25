@@ -23,7 +23,7 @@ Options:
 
 ```
 
-** Examples **
+### Examples ### 
 
 
 1) Continously download the currently active capture in 1 second PCAP splits
@@ -117,3 +117,17 @@ FilterICMP=true
 FilterIGMP=true
 ```
 
+### Config Files ### 
+
+It can be painful and a security risk including the FMADIO hostname + username + password on the command line every time. The scripts load a configuration file located in the home directory named .fmadio.conf 
+
+An example file looks like this:
+
+```
+$ cat ~/.fmadio.conf
+[General]
+username=fmadio
+password=secret
+hostname=192.168.1.1
+
+```
