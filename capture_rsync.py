@@ -222,24 +222,23 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 
 #-------------------------------------------------------------------------------------------------------------
 #  rsync the stream capture files
-def StreamFetch(SplitList, Prefix, FilterArg, Suffix = ""):
-	for Split in SplitList:
+def StreamFetch(Split, Prefix, FilterArg, Suffix = ""):
 
-		FileName =  Prefix + '_' + Split["Time"] + Suffix
-		print "["+FileName+"] Downloading...",
-		sys.stdout.flush()
-		TS0 = time.time()
+	FileName =  Prefix + '_' + Split["Time"] + Suffix
+	print "["+FileName+"] Downloading...",
+	sys.stdout.flush()
+	TS0 = time.time()
 
-		URL = Split["URL"] + "&" + FilterArg
-		CURLCmd(URL, ' > "' + FileName + '"') 
-		TS1 = time.time()
+	URL = Split["URL"] + "&" + FilterArg
+	CURLCmd(URL, ' > "' + FileName + '"') 
+	TS1 = time.time()
 
-		Size = os.path.getsize(FileName)
-		dT = TS1 - TS0
-		Bps = Size * 8 / dT
-		print " %6.3f GB" % (Size / 1e9),
-		print " %6.3f sec" % dT,
-		print " %10.6f Gbps" % (Bps / 1e9)
+	Size = os.path.getsize(FileName)
+	dT = TS1 - TS0
+	Bps = Size * 8 / dT
+	print " %6.3f GB" % (Size / 1e9),
+	print " %6.3f sec" % dT,
+	print " %10.6f Gbps" % (Bps / 1e9)
 
 #-------------------------------------------------------------------------------------------------------------
 #  fetch the specific capture as a single file 
@@ -596,13 +595,31 @@ else:
 			print("Sleeping...")
 			time.sleep(60)
 
-# without follow mode, its very straight forward 
+	# without follow mode  
 	else:
 
 		# get current split list
 		SplitList 	= StreamSplit( Entry["Name"], SplitView["Mode"])
-		StreamFetch(SplitList, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
+
+		# generate numeric time 
+		for Split in SplitList:
+			Split["TimeSec"] = ParseTimeStrSec(Split["Time"])
+
+		for idx,Split in enumerate(SplitList):
+
+			Prefix = OutputDir+ "/" + Entry["Name"] + "_"
+
+			#  filter based on time range (if specified)
+			if (StopTime != None) and (Split["TimeSec"] > StopTime):
+				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StopTime)"
+				continue;
+
+			if (StartTime != None) and (SplitList[idx+1] != None):
+				if (SplitList[idx+1]["TimeSec"] < StartTime):
+					print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StartTime)"
+					continue;
+
+			# download 
+			StreamFetch(Split, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
 
 	print("FilterSync complete")
-
-
