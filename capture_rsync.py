@@ -614,7 +614,7 @@ else:
 				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StopTime)"
 				continue;
 
-			if (StartTime != None) and (SplitList[idx+1] != None):
+			if (StartTime != None) and (len(SplitList) > idx + 1) and (SplitList[idx+1] != None):
 				if (SplitList[idx+1]["TimeSec"] < StartTime):
 					print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StartTime)"
 					continue;
