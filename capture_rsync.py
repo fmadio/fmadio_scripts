@@ -62,6 +62,22 @@ def Help():
 	print(" --stop  <HH:MM:SS>          : stop time") 
 	print(" --list                      : show all captures on the remote machine") 
 	print(" --compress                  : compress at the source (~1Gbps throughput)") 
+	print(" --filter <filterop>         : filter option") 
+	print("                             : FilterIPHost=1.2.3.4") 
+	print("                             : FilterIPHost=1.2.3.4/32") 
+	print("                             : FilterIPSrc=1.2.3.0/24") 
+	print("                             : FilterIPDst=1.2.3.0/24") 
+	print("                             : FilterTCPPort=1234")
+	print("                             : FilterTCPPort=1000-2000")
+	print("                             : FilterUDPPort=1234")
+	print("                             : FilterUDPPort=1000-2000")
+	print("                             : FilterTCP=true")
+	print("                             : FilterUDP=true")
+	print("                             : FilterDNS=true")
+	print("                             : FilterHTTP=true")
+	print("                             : FilterHTTPS=true")
+	print("                             : FilterICMP=true")
+	print("                             : FilterIGMP=true")
 	print(" -v                          : verbose output") 
 
 	sys.exit(0)
@@ -242,7 +258,7 @@ def StreamFetch(Split, Prefix, FilterArg, Suffix = ""):
 
 #-------------------------------------------------------------------------------------------------------------
 #  fetch the specific capture as a single file 
-def StreamSingle(StreamName, Prefix, Suffix, StartTime = None, StopTime = None):
+def StreamSingle(StreamName, Prefix, Suffix, StartTime = None, StopTime = None, FilterArg = None):
 
 	FileName =  Prefix + StreamName + Suffix 
 	print "["+StreamName+"] Downloading...\n",
@@ -262,6 +278,9 @@ def StreamSingle(StreamName, Prefix, Suffix, StartTime = None, StopTime = None):
 
 	if (Suffix == ".pcap.gz"):
 		URL = URL + "&Compression=fast"
+
+	if (FilterArg != None):
+		URL = URL + FilterArg
 
 	# use os.system so stderr outputs the progress bar
 	Cmd 	= CURL + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + ' > "' + FileName + '"' 
@@ -486,7 +505,7 @@ if (IsSingleFile == True):
 		StopTime = TSBase + StopTime * 1e9 - utc_offset.seconds * 1e9 
 
 	# download single pcap 
-	StreamSingle(CaptureName, OUTDIR + "/" + OUTNAME, Suffix, StartTime, StopTime)
+	StreamSingle(CaptureName, OUTDIR + "/" + OUTNAME, Suffix, StartTime, StopTime, FilterArg)
 	sys.exit(0);
 
 # find the split mode 
