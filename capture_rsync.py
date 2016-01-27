@@ -270,20 +270,23 @@ def StreamSingle(StreamName, Prefix, Suffix, StartTime = None, StopTime = None, 
 
 	# raw full capture 
 	if (StartTime == None) and (StopTime == None):
-		URL = "/pcap/single?StreamName="+StreamName
+		URL = "/pcap/single?StreamName="+StreamName+"&"
 	else:
 		URL = "/pcap/splittime?StreamName=" + StreamName + "&"
 		URL += "Start=%dULL&" % StartTime
 		URL += "Stop=%dULL&" % StopTime 
 
 	if (Suffix == ".pcap.gz"):
-		URL = URL + "&Compression=fast"
+		URL = URL + "Compression=fast&"
 
 	if (FilterArg != None):
 		URL = URL + FilterArg
 
 	# use os.system so stderr outputs the progress bar
 	Cmd 	= CURL + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + ' > "' + FileName + '"' 
+	if (VERBOSE == True):
+		print(Cmd)
+
 	os.system(Cmd)
 
 	TS1 = time.time()
