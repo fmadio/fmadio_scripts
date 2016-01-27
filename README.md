@@ -1,5 +1,7 @@
 # fmadio_scripts
 
+![Alt text](http://fmad.io/analytics/logo_flow_scripts.png "fmadio scripts logo")
+
 ### stream_rsync.py
 
 Python script for rsync like capture downloading. Can download from the FMADIO packet capture device in multiple split modes. 
