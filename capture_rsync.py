@@ -112,6 +112,8 @@ def StreamList():
 		URL			= L[4]
 		TS			= int(L[6])
 
+		print(Name, TS)
+
 		List.append( { "Name": Name, "Bytes":Bytes, "Packets":Packets, "Date":Date, "URL": URL, "TS":TS } )
 		#print FileName
 
@@ -476,11 +478,11 @@ if (IsSingleFile == True):
 	print("TZ Offset %d Sec" % utc_offset.seconds)
 
 	# convert time into epoch ns 
+	# NOTE: be areful with the timezone as it crosses midnight 
 
-	TSBase = math.floor(Entry["TS"] / (24*60*60*1e9)) * 24*60*60*1e9
-
+	TSBase = math.floor((Entry["TS"] + utc_offset.seconds * 1e9 ) / (24*60*60*1e9)) * 24*60*60*1e9
 	if (StartTime != None):
-		StartTime = TSBase + StartTime * 1e9 - utc_offset.seconds * 1e9 
+		StartTime = TSBase  + StartTime * 1e9  - utc_offset.seconds*1e9 
 
 	if (StopTime != None):
 		StopTime = TSBase + StopTime * 1e9 - utc_offset.seconds * 1e9 
