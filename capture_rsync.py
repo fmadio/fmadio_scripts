@@ -112,8 +112,6 @@ def StreamList():
 		URL			= L[4]
 		TS			= int(L[6])
 
-		print(Name, TS)
-
 		List.append( { "Name": Name, "Bytes":Bytes, "Packets":Packets, "Date":Date, "URL": URL, "TS":TS } )
 		#print FileName
 
