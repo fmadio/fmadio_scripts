@@ -1,6 +1,6 @@
 # fmadio_scripts
 
-![Alt text](http://fmad.io/analytics/logo_flow_scripts.png "fmadio scripts logo")
+![Alt text](http://fmad.io/analytics/logo_scripts.png "fmadio scripts logo")
 
 ### stream_rsync.py
 
