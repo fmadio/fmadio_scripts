@@ -83,7 +83,7 @@ Split Modes:
   split_1TB
 
 ```
-#### 3) Show List of captures on the FMADIO device at 192.168.1.1 with Username "fmadio" and Password "secret"
+#### 3) List all captures on the FMADIO device
 
 ```
 $ ./capture_rsync.py  --list --host 192.168.1.1 --user fmadio --pass secret 
@@ -94,7 +94,23 @@ Capture List
 
 ```
 
-#### 4) Split and Apply Filtering
+#### 4) Download all packets between 07:20:00 and 07:28:30 time interval of a capture with commpression 
+
+```
+$ ./capture_rsync.py  --single --compress --output /tmp/ --start 07:20:00 --stop 07:28:30  upload_20160128_1323
+RSync Capture Named [upload_20160128_1323]
+Single PCAP Compressed
+TZ Offset 32400 Sec
+[upload_20160128_1323] Downloading...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                   Dload  Upload   Total   Spent    Left  Speed
+100   537  100   537    0     0   201k      0 --:--:-- --:--:-- --:--:--  262k
+  0.000 GB   0.006 sec    0.000708 Gbps
+$
+
+```
+
+#### 5) Split and Apply Filtering
 
 
 Note: When filters are applied, downloaded files are always overwritten. 
@@ -133,7 +149,7 @@ FilterICMP=true
 FilterIGMP=true
 ```
 
-#### 5) Sync capture with 1GB split with GZip compression 
+#### 6) Sync capture with 1GB split with GZip compression 
 
 Note: Compression is perfomred on the capture device. This is best for rsync captures across a low bandwidth WAN connection
 
@@ -150,7 +166,7 @@ RSync Capture Named [remote_basic_1453696518952593920_20160125_1335]
 ```
 
 
-#### 6) Extract Single PCAP with GZip for a specific time range 
+#### 7) Extract Single PCAP with GZip for a specific time range 
 
 
 ```
