@@ -117,19 +117,27 @@ Capture List
 
 ```
 
-#### 4) Download all packets between 07:20:00 and 07:28:30 with commpression 
+#### 4) Download all packets between 13:35:45 and 13:35:46 with compression 
+
 
 ```
-$ ./capture_rsync.py  --single --compress --output /tmp/ --start 07:20:00 --stop 07:28:30  upload_20160128_1323
-RSync Capture Named [upload_20160128_1323]
+$ ./capture_rsync.py  --compress --single --start 13:35:45 --stop 13:35:46 --output /tmp/test remote_basic_1453696518952593920_20160125_1335
+RSync Capture Named [remote_basic_1453696518952593920_20160125_1335]
 Single PCAP Compressed
 TZ Offset 32400 Sec
-[upload_20160128_1323] Downloading...
+[remote_basic_1453696518952593920_20160125_1335] Downloading...
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                   Dload  Upload   Total   Spent    Left  Speed
-100   537  100   537    0     0   201k      0 --:--:-- --:--:-- --:--:--  262k
-  0.000 GB   0.006 sec    0.000708 Gbps
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  831M    0  831M    0     0  24.3M      0 --:--:--  0:00:34 --:--:-- 19.1M
+
+$ ls -al /tmp
+total 1601972
+drwxrwxrwt  5 root  root      20480  1月 25 14:57 .
+drwxr-xr-x 22 root  root       4096 12月 10 00:21 ..
+-rw-rw-r--  1 aaron aaron 871830615  1月 25 14:57 test_remote_basic_1453696518952593920_20160125_1335.pcap.gz
 $
+```
+
 
 ```
 
@@ -189,26 +197,6 @@ RSync Capture Named [remote_basic_1453696518952593920_20160125_1335]
 ```
 
 
-#### 7) Extract Single PCAP with GZip for a specific time range 
-
-
-```
-$ ./capture_rsync.py  --compress --single --start 13:35:45 --stop 13:35:46 --output /tmp/test remote_basic_1453696518952593920_20160125_1335
-RSync Capture Named [remote_basic_1453696518952593920_20160125_1335]
-Single PCAP Compressed
-TZ Offset 32400 Sec
-[remote_basic_1453696518952593920_20160125_1335] Downloading...
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  831M    0  831M    0     0  24.3M      0 --:--:--  0:00:34 --:--:-- 19.1M
-
-$ ls -al /tmp
-total 1601972
-drwxrwxrwt  5 root  root      20480  1月 25 14:57 .
-drwxr-xr-x 22 root  root       4096 12月 10 00:21 ..
--rw-rw-r--  1 aaron aaron 871830615  1月 25 14:57 test_remote_basic_1453696518952593920_20160125_1335.pcap.gz
-$
-```
 
 
 
