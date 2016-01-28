@@ -41,6 +41,9 @@ IsCompressMax		= False				# maximum space saving compression mode
 IsSingleFile		= False				# download entire capture as a single file
 StartTime			= None				# used for time based capture filtering
 StopTime			= None				# used for time based capture filtering
+IsVLANIgnore		= False				# ignore vlan information
+IsVLANStrip			= False				# strip vlan header (will loose FCS)
+FilterArg			= ""				# default filtering args
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -78,6 +81,8 @@ def Help():
 	print("                             : FilterHTTPS=true")
 	print("                             : FilterICMP=true")
 	print("                             : FilterIGMP=true")
+	print(" --vlan-ignore               : ignore vlan header") 
+	print(" --vlan-strip                : strips vlan header (will loose FCS)") 
 	print(" -v                          : verbose output") 
 
 	sys.exit(0)
@@ -419,7 +424,7 @@ while (i < len(sys.argv)):
 
 	if (arg == "--filter"):
 		IsFilter = True
-		FilterArg = sys.argv[ sys.argv.index(arg) + 1]
+		FilterArg += sys.argv[ sys.argv.index(arg) + 1] + "&"
 		i = i + 1
 
 	if (arg == "--compress"):
@@ -434,6 +439,15 @@ while (i < len(sys.argv)):
 		StopTime = ParseTimeStr( sys.argv[ sys.argv.index(arg) + 1] )
 		i = i + 1
 		IsStopTime = True;
+
+	if (arg == "--vlan-ignore"):
+		IsVLANIgnore = True
+		FilterArg += "VLANIgnore=true&"
+
+	if (arg == "--vlan-strip"):
+		IsVLANStrip = True
+		FilterArg += "VLANStrip=true&"
+
 
 	if (arg == "--help"):
 		Help()
