@@ -138,9 +138,6 @@ drwxr-xr-x 22 root  root       4096 12月 10 00:21 ..
 $
 ```
 
-
-```
-
 #### 5) Split and Apply Filtering
 
 
