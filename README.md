@@ -13,15 +13,38 @@ $ ./capture_rsync.py  --help
 capture_rsync <capture name> : RSync`s a capture to the local machine
 
 Options:
---follow                    : run in follow/poll mode. (default false)
---https                     : use HTTPS (defaults HTTP)
---host <hostname>           : specify host name
---user <username>           : HTTP(s) username
---pass <password>           : HTTP(s) password
---output <dir>              : output directory (default ./)
---splitmode <splitmode>     : select split mode (default 1min)
---splitlist                 : show split options
---list                      : show all captures on the remote machine
+ --follow                    : run in follow/poll mode. (default false)
+ --https                     : use HTTPS (defaults HTTP)
+ --host <hostname>           : specify host name
+ --user <username>           : HTTP(s) username
+ --pass <password>           : HTTP(s) password
+ --output <dir>              : output directory (default ./)
+ --single                    : downloads capture as a single PCAP)
+ --splitmode <splitmode>     : select split mode (default 1GB)
+ --splitlist                 : show split options
+ --start <HH:MM:SS>          : start time
+ --stop  <HH:MM:SS>          : stop time
+ --list                      : show all captures on the remote machine
+ --compress                  : compress at the source (~1Gbps throughput)
+ --filter <filterop>         : filter option
+                             : FilterIPHost=1.2.3.4
+                             : FilterIPHost=1.2.3.4/32
+                             : FilterIPSrc=1.2.3.0/24
+                             : FilterIPDst=1.2.3.0/24
+                             : FilterTCPPort=1234
+                             : FilterTCPPort=1000-2000
+                             : FilterUDPPort=1234
+                             : FilterUDPPort=1000-2000
+                             : FilterTCP=true
+                             : FilterUDP=true
+                             : FilterDNS=true
+                             : FilterHTTP=true
+                             : FilterHTTPS=true
+                             : FilterICMP=true
+                             : FilterIGMP=true
+ --vlan-ignore               : ignore vlan header
+ --vlan-strip                : strips vlan header (will loose FCS)
+ -v                          : verbose output
 
 ```
 
@@ -94,7 +117,7 @@ Capture List
 
 ```
 
-#### 4) Download all packets between 07:20:00 and 07:28:30 time interval of a capture with commpression 
+#### 4) Download all packets between 07:20:00 and 07:28:30 with commpression 
 
 ```
 $ ./capture_rsync.py  --single --compress --output /tmp/ --start 07:20:00 --stop 07:28:30  upload_20160128_1323
