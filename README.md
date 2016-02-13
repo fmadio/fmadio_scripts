@@ -44,6 +44,9 @@ Options:
                              : FilterIGMP=true
  --vlan-ignore               : ignore vlan header
  --vlan-strip                : strips vlan header (will loose FCS)
+ --date-jp                   : specify a Japanese date YYYYMMDD (also requires start/stop time)
+ --date-us                   : specify a US date       MMDDYYYY (also requires start/stop time)
+ --date                      : specify a normal date   DDYMMYYY (also requires start/stop time)
  -v                          : verbose output
 
 ```
@@ -193,9 +196,22 @@ RSync Capture Named [remote_basic_1453696518952593920_20160125_1335]
 [/tmp/remote_basic_1453696518952593920_20160125_1335_split_1GB/remote_basic_1453696518952593920_20160125_1335__20160125_13:35:44.309.412.608.pcap.gz] Downloading...   0.349 GB  13.401 sec    0.208301 Gbps
 ```
 
+#### 7) search captures for a specific date/start time/stop time into a single compressed pcap 
 
+Note: Compression is perfomred on the capture device. When used with 24/7 capture provides a convient way to extract data from the system 
 
+```
+$ ./capture_rsync.py  --date-jp 20160213 --start 11:10:00 --stop 11:11:00 --compress --single --output ./20160213_1110to1111.pcap.gz
+Searching 20160213 [11:10:00]-[11:11:00]
 
-
-
+found capture: capture247_20160213_1109
+Single PCAP Compressed
+TZ Offset 32400 Sec
+[capture247_20160213_1109] Downloading...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                   Dload  Upload   Total   Spent    Left  Speed
+100 11.7G    0 11.7G    0     0  31.2M      0 --:--:--  0:06:23 --:--:-- 31.6M
+ 12.585 GB  383.604 sec    0.262451 Gbps
+$
+```
 
