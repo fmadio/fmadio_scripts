@@ -521,7 +521,8 @@ if (IsDate == True):
 		# TSStart/End is in UTC
 		if (Capture["TSStart"] < StartTS) and (Capture["TSEnd"] > StopTS):
 			print("found capture: " + Capture["Name"])	
-			Entry = Capture
+			Entry 		= Capture
+			CaptureName = Capture["Name"]
 			break
 
 	if (Entry == None):
@@ -529,7 +530,7 @@ if (IsDate == True):
 		sys.exit(0)	
 
 # use a specific capture name  
-else if (CaptureName != None):
+elif (CaptureName != None):
 	Entry = None
 	for Capture in CaptureList:
 		#print(Capture["Name"])	
