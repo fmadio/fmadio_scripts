@@ -41,6 +41,9 @@ IsCompressMax		= False				# maximum space saving compression mode
 IsSingleFile		= False				# download entire capture as a single file
 StartTime			= None				# used for time based capture filtering
 StopTime			= None				# used for time based capture filtering
+IsStartTime			= False				# start time has been specified
+IsStopTime			= False				# stop time has been specified
+IsDate				= False				# date has been specified
 IsVLANIgnore		= False				# ignore vlan information
 IsVLANStrip			= False				# strip vlan header (will loose FCS)
 FilterArg			= ""				# default filtering args
@@ -83,6 +86,9 @@ def Help():
 	print("                             : FilterIGMP=true")
 	print(" --vlan-ignore               : ignore vlan header") 
 	print(" --vlan-strip                : strips vlan header (will loose FCS)") 
+	print(" --date-jp                   : specify a Japanese date YYYYMMDD (also requires start/stop time)")
+	print(" --date-us                   : specify a US date       MMDDYYYY (also requires start/stop time)")
+	print(" --date                      : specify a normal date   DDYMMYYY (also requires start/stop time)")
 	print(" -v                          : verbose output") 
 
 	sys.exit(0)
@@ -121,7 +127,7 @@ def StreamList():
 		L = Line.split(",")
 
 		# ignreo the title header
-		if (len(L) != 8): continue
+		if (len(L) != 9): continue
 		if (L[0].strip() == "Filename"): continue
 
 		# break each line into its components
@@ -130,11 +136,14 @@ def StreamList():
 		Bytes		= L[1]
 		Packets		= L[2]
 		Date		= L[3]
-		URL			= L[4]
-		TS			= int(L[6])
+		URL		= L[4]
 
-		List.append( { "Name": Name, "Bytes":Bytes, "Packets":Packets, "Date":Date, "URL": URL, "TS":TS } )
+		TSStart		= int(L[6])
+		TSEnd		= int(L[7])
+
+		List.append( { "Name": Name, "Bytes":Bytes, "Packets":Packets, "Date":Date, "URL":URL, "TS":TSStart, "TSStart":TSStart, "TSEnd":TSEnd } )
 		#print FileName
+
 
 	# return capture list in newest first order 
 	def getkey(item):
@@ -431,12 +440,14 @@ while (i < len(sys.argv)):
 		IsCompressFast = True;
 
 	if (arg == "--start"):
-		StartTime = ParseTimeStr( sys.argv[ sys.argv.index(arg) + 1] )
+		StartTimeStr = sys.argv[ sys.argv.index(arg) + 1]
+		StartTime = ParseTimeStr( StartTimeStr ) 
 		i = i + 1
 		IsStartTime = True;
 
 	if (arg == "--stop"):
-		StopTime = ParseTimeStr( sys.argv[ sys.argv.index(arg) + 1] )
+		StopTimeStr = sys.argv[ sys.argv.index(arg) + 1]
+		StopTime = ParseTimeStr(StopTimeStr)
 		i = i + 1
 		IsStopTime = True;
 
@@ -448,6 +459,26 @@ while (i < len(sys.argv)):
 		IsVLANStrip = True
 		FilterArg += "VLANStrip=true&"
 
+	# japanese style dates YYYYMMDD
+	if (arg == "--date-jp"):
+		IsDate 		= True
+		DateStr 	= sys.argv[ sys.argv.index(arg) + 1]
+		DateFormat	= "%Y%m%d"
+		i = i + 1
+
+	# us style dates MMDDYYYY
+	if (arg == "--date-us"):
+		IsDate 		= True
+		DateStr 	= sys.argv[ sys.argv.index(arg) + 1]
+		DateFormat	= "%m%d%Y"
+		i = i + 1
+
+	# normal style dates DDMMYYYY
+	if (arg == "--date"):
+		IsDate 		= True
+		DateStr 	= sys.argv[ sys.argv.index(arg) + 1]
+		DateFormat	= "%d%m%Y"
+		i = i + 1
 
 	if (arg == "--help"):
 		Help()
@@ -468,13 +499,37 @@ if (ShowCaptureList == True):
 
 	print("Capture List")
 	for Capture in CaptureList:
-		print("   " + Capture["Name"])	
+		dTS = Capture["TSEnd"] - Capture["TSStart"]
+		print("%-60s %s %8.2f min " % (Capture["Name"], Capture["Date"], dTS / 60e9) )	
 	sys.exit(0)
-		
 
-# after a specific capture
-Entry 		= CaptureList[0]
-if (CaptureName != None):
+Entry = None; 
+
+# searching for a specific date / time		
+if (IsDate == True):
+	if (IsStartTime != True) or (IsStopTime != True):
+		print("Must specifict start/stop time with --start HH:MM:SS --stop HH:MM:SS")
+		sys.exit(0)
+
+	StartTS	= time.mktime( time.strptime(DateStr+" "+StartTimeStr, DateFormat+" %H:%M:%S")) * 1e9
+	StopTS  = time.mktime( time.strptime(DateStr+" "+StopTimeStr , DateFormat+" %H:%M:%S")) * 1e9
+
+	# search capture list for start/stop times
+	print("Searching %s [%s]-[%s]\n" % (DateStr, StartTimeStr, StopTimeStr) )
+	for Capture in CaptureList:
+
+		# TSStart/End is in UTC
+		if (Capture["TSStart"] < StartTS) and (Capture["TSEnd"] > StopTS):
+			print("found capture: " + Capture["Name"])	
+			Entry = Capture
+			break
+
+	if (Entry == None):
+		print("Failed to find capture on [%s] between [%s]->[%s]\n" % ( DateStr, StartTimeStr, StopTimeStr) )
+		sys.exit(0)	
+
+# use a specific capture name  
+else if (CaptureName != None):
 	Entry = None
 	for Capture in CaptureList:
 		#print(Capture["Name"])	
@@ -484,6 +539,11 @@ if (CaptureName != None):
 	if (Entry == None):
 		print("Failed to find capture ["+CaptureName+"]")
 		sys.exit(0)	
+
+# use the latest capture file
+else:
+	Entry 		= CaptureList[0]
+
 
 # get capture info 
 View 		= StreamView( Entry["Name"] )
@@ -537,7 +597,6 @@ if (SplitView == None):
 	sys.exit(0)
 
 # make the output directory
-
 OutputDir = OUTDIR
 if (OUTDIR[-1] != "/"):
 	OutputDir += + "_"
@@ -555,7 +614,7 @@ if (IsCompressFast == True) or (IsCompressMax == True):
 	Suffix = ".pcap.gz"
 	URLArg = "&Compression=fast"
 
-# intelligent rsync mode 
+# intelligent rsync mode  (no filters)
 if (IsFilter == False):
 	ShowGood = True 
 	while True:
@@ -597,12 +656,12 @@ if (IsFilter == False):
 
 	print("RSync complete")
 
+# filters have been applied
 else:
-# follow mode with filtering requires different code path
-# it requires 
-# 1) to not download the last item 
-# 2) keep a list of already downloaded splits
-		 
+	# follow mode with filtering requires different code path
+	# it requires 
+	# 1) to not download the last item 
+	# 2) keep a list of already downloaded splits
 	if (IsFollow == True):
 
 		DownloadList = {} 
