@@ -96,6 +96,13 @@ def Help():
 #######################################################################################################################
 #######################################################################################################################
 
+# str to int with default value
+def default_int(Str, Default):
+	try:
+		return int(Str);
+	except:
+		return Default
+
 #-------------------------------------------------------------------------------------------------------------
 # issue CURL command
 def CURLCmd( URL, Silent = "-s", Suffix = "" ):
@@ -126,24 +133,23 @@ def StreamList():
 	for Line in Lines:
 		L = Line.split(",")
 
-		# ignreo the title header
-		if (len(L) != 9): continue
 		if (L[0].strip() == "Filename"): continue
 
-		# break each line into its components
+		# ignreo the title header
+		if (len(L) >= 8):
+			# break each line into its components
 
-		Name	 	= L[0].strip()	
-		Bytes		= L[1]
-		Packets		= L[2]
-		Date		= L[3]
-		URL		= L[4]
+			Name	 	= L[0].strip()	
+			Bytes		= L[1]
+			Packets		= L[2]
+			Date		= L[3]
+			URL			= L[4]
 
-		TSStart		= int(L[6])
-		TSEnd		= int(L[7])
+			TSStart		= default_int(L[6], 0)
+			TSEnd		= default_int(L[7], TSStart)
 
-		List.append( { "Name": Name, "Bytes":Bytes, "Packets":Packets, "Date":Date, "URL":URL, "TS":TSStart, "TSStart":TSStart, "TSEnd":TSEnd } )
-		#print FileName
-
+			List.append( { "Name": Name, "Bytes":Bytes, "Packets":Packets, "Date":Date, "URL":URL, "TS":TSStart, "TSStart":TSStart, "TSEnd":TSEnd } )
+			#print FileName
 
 	# return capture list in newest first order 
 	def getkey(item):
