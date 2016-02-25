@@ -649,14 +649,20 @@ if (IsFilter == False):
 
 			# rsync stream list to the output dir
 			StreamRSync(	Split, 
-								Prefix,	
-								ShowGood, 
-								Suffix,
-								URLArg) 
+							Prefix,	
+							ShowGood, 
+							Suffix,
+							URLArg) 
 
 		# continoius follow/poll mode ? 
 		if (IsFollow != True):
 			break
+
+		# ensure we`re grabbing the last capture when in follow mode
+		# e.g. during midnight roll in follow mode 
+		if (CaptureName == None):	
+			CaptureList 	= StreamList()
+			Entry 			= CaptureList[0]
 
 		time.sleep(60)
 		ShowGood = False
