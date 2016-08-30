@@ -21,13 +21,15 @@ HOSTNAME			= "192.168.1.1"
 CURL				= "/usr/bin/curl"
 VERBOSE				= False 
 OUTDIR				= "./"
-SPLIT_MODE			= "split_15min"
+SPLIT_MODE			= "split_1min"
 
 CaptureName			= None
 ShowSplitList		= False				# show the split options for the specified capture
 ShowCaptureList 	= False 			# show the list of captures on the device
 IsFollow			= False				# poll / follow mode
 IsCompress			= True				# default enable compression 
+IsVLANIgnore		= False				# ignore vlan information
+IsVLANStrip			= False				# strip vlan header (will loose FCS)
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -36,9 +38,9 @@ MarketDataGroup = {
 {
 	# market data splits
 	"MD" : [		
-		{ "MCGroup" : "223.54.12.111", "Port": 26477, "VLAN" : 1273, "Prefix": "ITCH5"     },			# itch 5
-		{ "MCGroup" : "223.54.12.45",  "Port": 26477, "VLAN" : 1273, "Prefix": "ITCH5_PAX" },			# ichh pax5
-		{ "MCGroup" : "223.54.12.40",  "Port": 26475, "VLAN" : 1273, "Prefix": "ITCH5_BX"  }			# itch bx5
+		{ "MCGroup" : "233.54.12.111", "Port": 26477, "VLAN" : 1273, "Prefix": "itch5"    },		# itch 5
+		{ "MCGroup" : "233.54.12.45",  "Port": 26477, "VLAN" : 1273, "Prefix": "itch5psx" },		# ichh psx 
+		{ "MCGroup" : "233.54.12.40",  "Port": 26475, "VLAN" : 1273, "Prefix": "itch5bx"  }			# itch bx5
 	],
 	# include order/entry ip`s
     "OE" : [
@@ -49,10 +51,10 @@ MarketDataGroup = {
 {
 	# market data splits
 	"MD" : [		
-		{ "MCGroup" : "233.125.69.24", "Port": 11064, "VLAN" : 2273, "Prefix": "NYSE_XDP_CH1" },	# nyse XDP channel 1
-		{ "MCGroup" : "233.125.69.25", "Port": 11065, "VLAN" : 2273, "Prefix": "NYSE_XDP_CH2" },	# nyse XDP channel 2
-		{ "MCGroup" : "233.125.69.26", "Port": 11066, "VLAN" : 2273, "Prefix": "NYSE_XDP_CH3" },	# nyse XDP channel 3
-		{ "MCGroup" : "233.125.69.27", "Port": 11067, "VLAN" : 2273, "Prefix": "NYSE_XDP_CH4" }		# nyse XDP channel 4
+		{ "MCGroup" : "233.125.89.24", "Port": 11064, "VLAN" : 2273, "Prefix": "nysexdp" },		# nyse XDP channel 1
+		{ "MCGroup" : "233.125.89.25", "Port": 11065, "VLAN" : 2273, "Prefix": "nysexdp" },		# nyse XDP channel 2
+		{ "MCGroup" : "233.125.89.26", "Port": 11066, "VLAN" : 2273, "Prefix": "nysexdp" },		# nyse XDP channel 3
+		{ "MCGroup" : "233.125.89.27", "Port": 11067, "VLAN" : 2273, "Prefix": "nysexdp" }		# nyse XDP channel 4
 	],
 	# include order/entry ip`s
     "OE" : [
@@ -63,10 +65,10 @@ MarketDataGroup = {
 {
 	# market data splits
 	"MD" : [		
-		{ "MCGroup" : "224.0.59.64", "Port": 11064, "VLAN" : 2273, "Prefix": "ARCA_XDP_CH1" },		# arca XDP channel 1
-		{ "MCGroup" : "224.0.59.65", "Port": 11064, "VLAN" : 2273, "Prefix": "ARCA_XDP_CH2" },		# arca XDP channel 2
-		{ "MCGroup" : "224.0.59.66", "Port": 11064, "VLAN" : 2273, "Prefix": "ARCA_XDP_CH3" },		# arca XDP channel 3
-		{ "MCGroup" : "224.0.59.67", "Port": 11064, "VLAN" : 2273, "Prefix": "ARCA_XDP_CH4" },		# arcaXDP channel 4
+		{ "MCGroup" : "224.0.59.64", "Port": 11064, "VLAN" : 2273, "Prefix": "arcaxdp" },		# arca XDP channel 1
+		{ "MCGroup" : "224.0.59.65", "Port": 11065, "VLAN" : 2273, "Prefix": "arcaxdp" },		# arca XDP channel 2
+		{ "MCGroup" : "224.0.59.66", "Port": 11066, "VLAN" : 2273, "Prefix": "arcaxdp" },		# arca XDP channel 3
+		{ "MCGroup" : "224.0.59.67", "Port": 11067, "VLAN" : 2273, "Prefix": "arcaxdp" },		# arcaXDP channel 4
 	],
 	# include order/entry ip`s
     "OE" : [
@@ -77,42 +79,175 @@ MarketDataGroup = {
 {
 	# market data splits
 	"MD" : [		
-		{ "MCGroup" : "224.0.130.128", "Port": 30000, "VLAN" : 1273, "Prefix": "BATS_BZX_CH01" },	# bats bzx channel 1 
-		{ "MCGroup" : "224.0.130.129", "Port": 30005, "VLAN" : 1273, "Prefix": "BATS_BZX_CH05" },	# bats bzx channel 5 
-		{ "MCGroup" : "224.0.130.130", "Port": 30009, "VLAN" : 1273, "Prefix": "BATS_BZX_CH09" },	# bats bzx channel 9 
-		{ "MCGroup" : "224.0.130.131", "Port": 30013, "VLAN" : 1273, "Prefix": "BATS_BZX_CH13" },	# bats bzx channel 13 
-		{ "MCGroup" : "224.0.130.132", "Port": 30017, "VLAN" : 1273, "Prefix": "BATS_BZX_CH17" },	# bats bzx channel 17
-		{ "MCGroup" : "224.0.130.133", "Port": 30021, "VLAN" : 1273, "Prefix": "BATS_BZX_CH21" },	# bats bzx channel 21
-		{ "MCGroup" : "224.0.130.134", "Port": 30025, "VLAN" : 1273, "Prefix": "BATS_BZX_CH25" },	# bats bzx channel 25
-		{ "MCGroup" : "224.0.130.135", "Port": 30029, "VLAN" : 1273, "Prefix": "BATS_BZX_CH29" },	# bats bzx channel 29
-		{ "MCGroup" : "224.0.130.136", "Port": 30032, "VLAN" : 1273, "Prefix": "BATS_BZX_CH33" },	# bats bzx channel 33
+		{ "MCGroup" : "224.0.130.128", "Port": 30001, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 1 
+		{ "MCGroup" : "224.0.130.128", "Port": 30002, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 2 
+		{ "MCGroup" : "224.0.130.128", "Port": 30003, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 3 
+		{ "MCGroup" : "224.0.130.128", "Port": 30004, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 4 
 
-		{ "MCGroup" : "224.0.130.192", "Port": 30201, "VLAN" : 1273, "Prefix": "BATS_BYX_CH01" },	# bats byx channel 1
-		{ "MCGroup" : "224.0.130.193", "Port": 30205, "VLAN" : 1273, "Prefix": "BATS_BYX_CH05" },	# bats byx channel 5
-		{ "MCGroup" : "224.0.130.194", "Port": 30209, "VLAN" : 1273, "Prefix": "BATS_BYX_CH09" },	# bats byx channel 9
-		{ "MCGroup" : "224.0.130.195", "Port": 30213, "VLAN" : 1273, "Prefix": "BATS_BYX_CH13" },	# bats byx channel 13
-		{ "MCGroup" : "224.0.130.196", "Port": 30217, "VLAN" : 1273, "Prefix": "BATS_BYX_CH17" },	# bats byx channel 17
-		{ "MCGroup" : "224.0.130.197", "Port": 30221, "VLAN" : 1273, "Prefix": "BATS_BYX_CH21" },	# bats byx channel 21 
-		{ "MCGroup" : "224.0.130.198", "Port": 30225, "VLAN" : 1273, "Prefix": "BATS_BYX_CH25" },	# bats byx channel 25 
-		{ "MCGroup" : "224.0.130.199", "Port": 30229, "VLAN" : 1273, "Prefix": "BATS_BYX_CH29" },	# bats byx channel 29 
+		{ "MCGroup" : "224.0.130.129", "Port": 30005, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 5 
+		{ "MCGroup" : "224.0.130.129", "Port": 30006, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 6 
+		{ "MCGroup" : "224.0.130.129", "Port": 30007, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 7 
+		{ "MCGroup" : "224.0.130.129", "Port": 30008, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 8 
 
-		{ "MCGroup" : "224.0.130.0",   "Port": 30301, "VLAN" : 1273, "Prefix": "BATS_EDGEA_CH01" },	# bats edge A channel 1 
-		{ "MCGroup" : "224.0.130.1",   "Port": 30305, "VLAN" : 1273, "Prefix": "BATS_EDGEA_CH05" },	# bats edge A channel 5 
-		{ "MCGroup" : "224.0.130.2",   "Port": 30309, "VLAN" : 1273, "Prefix": "BATS_EDGEA_CH09" },	# bats edge A channel 9 
-		{ "MCGroup" : "224.0.130.3",   "Port": 30313, "VLAN" : 1273, "Prefix": "BATS_EDGEA_CH13" },	# bats edge A channel 13 
-		{ "MCGroup" : "224.0.130.4",   "Port": 30317, "VLAN" : 1273, "Prefix": "BATS_EDGEA_CH17" },	# bats edge A channel 17
-		{ "MCGroup" : "224.0.130.5",   "Port": 30321, "VLAN" : 1273, "Prefix": "BATS_EDGEA_CH21" },	# bats edge A channel 21
-		{ "MCGroup" : "224.0.130.6",   "Port": 30325, "VLAN" : 1273, "Prefix": "BATS_EDGEA_CH25" },	# bats edge A channel 25
-		{ "MCGroup" : "224.0.130.7",   "Port": 30329, "VLAN" : 1273, "Prefix": "BATS_EDGEA_CH29" },	# bats edge A channel 29
+		{ "MCGroup" : "224.0.130.130", "Port": 30009, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 9 
+		{ "MCGroup" : "224.0.130.130", "Port": 30010, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 10 
+		{ "MCGroup" : "224.0.130.130", "Port": 30011, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 11
+		{ "MCGroup" : "224.0.130.130", "Port": 30012, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 12 
 
-		{ "MCGroup" : "224.0.130.64",  "Port": 30401, "VLAN" : 1273, "Prefix": "BATS_EDGEX_CH01" },	# bats edge X channel 1 
-		{ "MCGroup" : "224.0.130.65",  "Port": 30405, "VLAN" : 1273, "Prefix": "BATS_EDGEX_CH05" },	# bats edge X channel 5 
-		{ "MCGroup" : "224.0.130.66",  "Port": 30409, "VLAN" : 1273, "Prefix": "BATS_EDGEX_CH09" },	# bats edge X channel 9 
-		{ "MCGroup" : "224.0.130.67",  "Port": 30413, "VLAN" : 1273, "Prefix": "BATS_EDGEX_CH13" },	# bats edge X channel 13 
-		{ "MCGroup" : "224.0.130.68",  "Port": 30417, "VLAN" : 1273, "Prefix": "BATS_EDGEX_CH17" },	# bats edge X channel 17
-		{ "MCGroup" : "224.0.130.69",  "Port": 30421, "VLAN" : 1273, "Prefix": "BATS_EDGEX_CH21" },	# bats edge X channel 21
-		{ "MCGroup" : "224.0.130.70",  "Port": 30425, "VLAN" : 1273, "Prefix": "BATS_EDGEX_CH25" },	# bats edge X channel 25
-		{ "MCGroup" : "224.0.130.71",  "Port": 30429, "VLAN" : 1273, "Prefix": "BATS_EDGEX_CH29" }	# bats edge X channel 29
+		{ "MCGroup" : "224.0.130.131", "Port": 30013, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 13 
+		{ "MCGroup" : "224.0.130.131", "Port": 30014, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 14 
+		{ "MCGroup" : "224.0.130.131", "Port": 30015, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 15 
+		{ "MCGroup" : "224.0.130.131", "Port": 30016, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 16 
+
+		{ "MCGroup" : "224.0.130.132", "Port": 30017, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 17
+		{ "MCGroup" : "224.0.130.132", "Port": 30018, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 18
+		{ "MCGroup" : "224.0.130.132", "Port": 30019, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 19
+		{ "MCGroup" : "224.0.130.132", "Port": 30020, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 20
+
+		{ "MCGroup" : "224.0.130.133", "Port": 30021, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 21
+		{ "MCGroup" : "224.0.130.133", "Port": 30022, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 22
+		{ "MCGroup" : "224.0.130.133", "Port": 30023, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 23
+		{ "MCGroup" : "224.0.130.133", "Port": 30024, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 24
+
+		{ "MCGroup" : "224.0.130.134", "Port": 30025, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 25
+		{ "MCGroup" : "224.0.130.134", "Port": 30026, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 26
+		{ "MCGroup" : "224.0.130.134", "Port": 30027, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 27
+		{ "MCGroup" : "224.0.130.134", "Port": 30028, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 28
+
+		{ "MCGroup" : "224.0.130.135", "Port": 30029, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 29
+		{ "MCGroup" : "224.0.130.135", "Port": 30030, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 30
+		{ "MCGroup" : "224.0.130.135", "Port": 30031, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 31
+
+		{ "MCGroup" : "224.0.130.136", "Port": 30032, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 32
+		{ "MCGroup" : "224.0.130.136", "Port": 30033, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 33
+		{ "MCGroup" : "224.0.130.136", "Port": 30034, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 34
+		{ "MCGroup" : "224.0.130.136", "Port": 30035, "VLAN" : 1273, "Prefix": "batsbzx" },	# bats bzx channel 35
+
+		# BYX
+
+		{ "MCGroup" : "224.0.130.192", "Port": 30201, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 1
+		{ "MCGroup" : "224.0.130.192", "Port": 30202, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 2
+		{ "MCGroup" : "224.0.130.192", "Port": 30203, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 3
+		{ "MCGroup" : "224.0.130.192", "Port": 30204, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 4
+
+		{ "MCGroup" : "224.0.130.193", "Port": 30205, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 5
+		{ "MCGroup" : "224.0.130.193", "Port": 30206, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 6
+		{ "MCGroup" : "224.0.130.193", "Port": 30207, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 7
+		{ "MCGroup" : "224.0.130.193", "Port": 30208, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 8
+
+		{ "MCGroup" : "224.0.130.194", "Port": 30209, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 9
+		{ "MCGroup" : "224.0.130.194", "Port": 30210, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 10
+		{ "MCGroup" : "224.0.130.194", "Port": 30211, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 11
+		{ "MCGroup" : "224.0.130.194", "Port": 30212, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 12
+
+		{ "MCGroup" : "224.0.130.195", "Port": 30213, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 13
+		{ "MCGroup" : "224.0.130.195", "Port": 30214, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 14
+		{ "MCGroup" : "224.0.130.195", "Port": 30215, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 15
+		{ "MCGroup" : "224.0.130.195", "Port": 30216, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 16
+
+		{ "MCGroup" : "224.0.130.196", "Port": 30217, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 17
+		{ "MCGroup" : "224.0.130.196", "Port": 30218, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 18
+		{ "MCGroup" : "224.0.130.196", "Port": 30219, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 19
+		{ "MCGroup" : "224.0.130.196", "Port": 30220, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 20
+
+		{ "MCGroup" : "224.0.130.197", "Port": 30221, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 21 
+		{ "MCGroup" : "224.0.130.197", "Port": 30222, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 22 
+		{ "MCGroup" : "224.0.130.197", "Port": 30223, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 23 
+		{ "MCGroup" : "224.0.130.197", "Port": 30224, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 24 
+
+		{ "MCGroup" : "224.0.130.198", "Port": 30225, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 25 
+		{ "MCGroup" : "224.0.130.198", "Port": 30226, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 26 
+		{ "MCGroup" : "224.0.130.198", "Port": 30227, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 27 
+		{ "MCGroup" : "224.0.130.198", "Port": 30228, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 28 
+
+		{ "MCGroup" : "224.0.130.199", "Port": 30229, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 29 
+		{ "MCGroup" : "224.0.130.199", "Port": 30230, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 30 
+		{ "MCGroup" : "224.0.130.199", "Port": 30231, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 31 
+		{ "MCGroup" : "224.0.130.199", "Port": 30232, "VLAN" : 1273, "Prefix": "batsbyx" },	# bats byx channel 32 
+
+		# EDGEA
+
+		{ "MCGroup" : "224.0.130.0",   "Port": 30301, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 1 
+		{ "MCGroup" : "224.0.130.0",   "Port": 30302, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 2 
+		{ "MCGroup" : "224.0.130.0",   "Port": 30303, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 3 
+		{ "MCGroup" : "224.0.130.0",   "Port": 30304, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 4 
+
+		{ "MCGroup" : "224.0.130.1",   "Port": 30305, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 5 
+		{ "MCGroup" : "224.0.130.1",   "Port": 30306, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 6 
+		{ "MCGroup" : "224.0.130.1",   "Port": 30307, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 7 
+		{ "MCGroup" : "224.0.130.1",   "Port": 30308, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 8 
+
+		{ "MCGroup" : "224.0.130.2",   "Port": 30309, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 9 
+		{ "MCGroup" : "224.0.130.2",   "Port": 30310, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 10 
+		{ "MCGroup" : "224.0.130.2",   "Port": 30311, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 11  
+		{ "MCGroup" : "224.0.130.2",   "Port": 30312, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 12 
+
+		{ "MCGroup" : "224.0.130.3",   "Port": 30313, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 13 
+		{ "MCGroup" : "224.0.130.3",   "Port": 30314, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 14 
+		{ "MCGroup" : "224.0.130.3",   "Port": 30315, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 15 
+		{ "MCGroup" : "224.0.130.3",   "Port": 30316, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 16 
+
+		{ "MCGroup" : "224.0.130.4",   "Port": 30317, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 17
+		{ "MCGroup" : "224.0.130.4",   "Port": 30318, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 18
+		{ "MCGroup" : "224.0.130.4",   "Port": 30319, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 19
+		{ "MCGroup" : "224.0.130.4",   "Port": 30320, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 20
+
+		{ "MCGroup" : "224.0.130.5",   "Port": 30321, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 21
+		{ "MCGroup" : "224.0.130.5",   "Port": 30322, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 22
+		{ "MCGroup" : "224.0.130.5",   "Port": 30323, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 23
+		{ "MCGroup" : "224.0.130.5",   "Port": 30324, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 24
+
+		{ "MCGroup" : "224.0.130.6",   "Port": 30325, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 25
+		{ "MCGroup" : "224.0.130.6",   "Port": 30326, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 25
+		{ "MCGroup" : "224.0.130.6",   "Port": 30327, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 25
+		{ "MCGroup" : "224.0.130.6",   "Port": 30328, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 25
+
+		{ "MCGroup" : "224.0.130.7",   "Port": 30329, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 29
+		{ "MCGroup" : "224.0.130.7",   "Port": 30330, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 30
+		{ "MCGroup" : "224.0.130.7",   "Port": 30331, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 31
+		{ "MCGroup" : "224.0.130.7",   "Port": 30332, "VLAN" : 1273, "Prefix": "batsedga" },	# bats edge A channel 32
+
+		# EDGEX
+
+		{ "MCGroup" : "224.0.130.64",  "Port": 30401, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 1 
+		{ "MCGroup" : "224.0.130.64",  "Port": 30402, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 1 
+		{ "MCGroup" : "224.0.130.64",  "Port": 30403, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 1 
+		{ "MCGroup" : "224.0.130.64",  "Port": 30404, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 1 
+
+		{ "MCGroup" : "224.0.130.65",  "Port": 30405, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 5 
+		{ "MCGroup" : "224.0.130.65",  "Port": 30406, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 5 
+		{ "MCGroup" : "224.0.130.65",  "Port": 30407, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 5 
+		{ "MCGroup" : "224.0.130.65",  "Port": 30408, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 5 
+
+		{ "MCGroup" : "224.0.130.66",  "Port": 30409, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 9 
+		{ "MCGroup" : "224.0.130.66",  "Port": 30410, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 9 
+		{ "MCGroup" : "224.0.130.66",  "Port": 30411, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 9 
+		{ "MCGroup" : "224.0.130.66",  "Port": 30412, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 9 
+
+		{ "MCGroup" : "224.0.130.67",  "Port": 30413, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 13 
+		{ "MCGroup" : "224.0.130.67",  "Port": 30414, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 13 
+		{ "MCGroup" : "224.0.130.67",  "Port": 30415, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 13 
+		{ "MCGroup" : "224.0.130.67",  "Port": 30416, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 13 
+
+		{ "MCGroup" : "224.0.130.68",  "Port": 30417, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 17
+		{ "MCGroup" : "224.0.130.68",  "Port": 30418, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 17
+		{ "MCGroup" : "224.0.130.68",  "Port": 30419, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 17
+		{ "MCGroup" : "224.0.130.68",  "Port": 30420, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 17
+
+		{ "MCGroup" : "224.0.130.69",  "Port": 30421, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 21
+		{ "MCGroup" : "224.0.130.69",  "Port": 30422, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 21
+		{ "MCGroup" : "224.0.130.69",  "Port": 30423, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 21
+		{ "MCGroup" : "224.0.130.69",  "Port": 30424, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 21
+
+		{ "MCGroup" : "224.0.130.70",  "Port": 30425, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 25
+		{ "MCGroup" : "224.0.130.70",  "Port": 30426, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 25
+		{ "MCGroup" : "224.0.130.70",  "Port": 30427, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 25
+		{ "MCGroup" : "224.0.130.70",  "Port": 30428, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 25
+
+		{ "MCGroup" : "224.0.130.71",  "Port": 30429, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 29
+		{ "MCGroup" : "224.0.130.71",  "Port": 30430, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 29
+		{ "MCGroup" : "224.0.130.71",  "Port": 30431, "VLAN" : 1273, "Prefix": "batsedgx" },	# bats edge X channel 29
+		{ "MCGroup" : "224.0.130.71",  "Port": 30432, "VLAN" : 1273, "Prefix": "batsedgx" }		# bats edge X channel 29
 	],
 	# include order/entry ip`s
     "OE" : [
@@ -156,16 +291,16 @@ MarketDataGroup = {
 
 def Help():
 
-	print("capture_rsync <capture name> : RSync`s a capture to the local machine")
+	print("market_rsync <capture name> : RSync`s market data from various exchanges")
 	print("")
 	print("Options:")
-	print(" --                    : run in follow/poll mode. (default false)")
 	print(" --https                     : use HTTPS (defaults HTTP)") 
 	print(" --host <hostname>           : specify host name") 
 	print(" --user <username>           : HTTP(s) username") 
 	print(" --pass <password>           : HTTP(s) password") 
 	print(" --output <dir>              : output directory (default ./)") 
 	print(" --compress                  : compress at the source (~1Gbps throughput)") 
+	print(" --list                      : list captures on the system") 
 	print(" --vlan-ignore               : ignore vlan header") 
 	print(" --vlan-strip                : strips vlan header (will loose FCS)") 
 	print(" --market <name>             : specify market to extract") 
@@ -307,7 +442,9 @@ def StreamSplit(CaptureName, SplitMode):
 #  rsync the stream capture files
 def StreamFetch(Split, Prefix, FilterArg, Suffix = ""):
 
-	FileName =  Prefix + '_' + Split["Time"] + Suffix
+	SplitHMS = Split["Time"][9:17]
+
+	FileName =  Prefix + '_' + SplitHMS + Suffix
 	FileName = FileName.replace(":", "_")
 
 	FileNameStr = "%-90s" % FileName 
@@ -388,14 +525,22 @@ while (i < len(sys.argv)):
 	if (arg == "--compress"):
 		IsCompressFast = True;
 
+	if (arg == "--splitmode"):
+		SPLIT_MODE = sys.argv[ sys.argv.index(arg) + 1] ;
+		i = i + 1
+
 	if (arg == "--market"):
 		MarketName = sys.argv[ sys.argv.index(arg) + 1] 
+		i = i + 1
+
+	if (arg == "--vlan-ignore"):
+		IsVLANIgnore = True
+
+	if (arg == "--vlan-strip"):
+		IsVLANStrip = True
 
 	if (arg == "--help"):
 		Help()
-
-
-
 
 	if (arg[0] != "-"):
 		CaptureName = arg
@@ -469,8 +614,16 @@ for Split in SplitList:
 	MD			= Exchange		 	["MD"] 
 
 	for MDGroup in MD :
-		FilterArg = "&FilterIPDst="+MDGroup["MCGroup"]
-		OutputFile = MDGroup["Prefix"]
 
+		FilterArg = ""
+		FilterArg += "&FilterMCGroupPort=%s-%i" % (MDGroup["MCGroup"], MDGroup["Port"])
+
+		if (IsVLANIgnore == True) :
+			FilterArg += "&VLANIgnore=true"
+
+		if (IsVLANStrip == True) :
+			FilterArg += "&VLANStrip=true"
+
+		OutputFile = "%s_%i" % (MDGroup["Prefix"], MDGroup["Port"])
 		StreamFetch(Split, OutputDir + "/" + OutputFile, URLArg +  FilterArg, Suffix) 
 
