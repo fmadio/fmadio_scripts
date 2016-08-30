@@ -30,6 +30,7 @@ IsFollow			= False				# poll / follow mode
 IsCompress			= True				# default enable compression 
 IsVLANIgnore		= False				# ignore vlan information
 IsVLANStrip			= False				# strip vlan header (will loose FCS)
+IsNoProxy			= False				# disable use of http proxy 
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -303,6 +304,7 @@ def Help():
 	print(" --list                      : list captures on the system") 
 	print(" --vlan-ignore               : ignore vlan header") 
 	print(" --vlan-strip                : strips vlan header (will loose FCS)") 
+	print(" --noproxy                   : disable use of proxy") 
 	print(" --market <name>             : specify market to extract") 
 	print("                             : NASDAQ") 
 	print("                             : NYSE") 
@@ -329,7 +331,12 @@ def default_int(Str, Default):
 # issue CURL command
 def CURLCmd( URL, Silent = "-s", Suffix = "" ):
 
-	Cmd 	= CURL + ' ' + Silent + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + Suffix
+	Cmd 	= CURL
+	if (IsNoProxy == True):
+		Cmd += ' --noproxy "*"'
+	Cmd 	+= ' ' + Silent
+	Cmd		+= ' -u ' + USERNAME + ':' + PASSWORD
+	Cmd		+= ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + Suffix
 	if (VERBOSE == True):
 		print("\r[%s]\n" % Cmd)
 
@@ -538,6 +545,9 @@ while (i < len(sys.argv)):
 
 	if (arg == "--vlan-strip"):
 		IsVLANStrip = True
+
+	if (arg == "--noproxy"):
+		IsNoProxy = True;
 
 	if (arg == "--help"):
 		Help()
