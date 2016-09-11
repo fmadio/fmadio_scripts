@@ -46,6 +46,8 @@ IsStopTime			= False				# stop time has been specified
 IsDate				= False				# date has been specified
 IsVLANIgnore		= False				# ignore vlan information
 IsVLANStrip			= False				# strip vlan header (will loose FCS)
+IsNoProxy			= False				# disable use of http proxy 
+
 FilterArg			= ""				# default filtering args
 
 #-------------------------------------------------------------------------------------------------------------
@@ -89,6 +91,7 @@ def Help():
 	print(" --date-jp                   : specify a Japanese date YYYYMMDD (also requires start/stop time)")
 	print(" --date-us                   : specify a US date       MMDDYYYY (also requires start/stop time)")
 	print(" --date                      : specify a normal date   DDYMMYYY (also requires start/stop time)")
+	print(" --noproxy                   : disable use of proxy") 
 	print(" -v                          : verbose output") 
 
 	sys.exit(0)
@@ -107,7 +110,13 @@ def default_int(Str, Default):
 # issue CURL command
 def CURLCmd( URL, Silent = "-s", Suffix = "" ):
 
-	Cmd 	= CURL + ' ' + Silent + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + Suffix
+	Cmd 	= CURL
+	if (IsNoProxy == True):
+		Cmd += ' --noproxy "*"'
+	Cmd 	+= ' ' + Silent
+	Cmd		+= ' -u ' + USERNAME + ':' + PASSWORD
+	Cmd		+= ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + Suffix
+
 	if (VERBOSE == True):
 		print("\r[%s]\n" % Cmd)
 
@@ -485,6 +494,9 @@ while (i < len(sys.argv)):
 		DateStr 	= sys.argv[ sys.argv.index(arg) + 1]
 		DateFormat	= "%d%m%Y"
 		i = i + 1
+
+	if (arg == "--noproxy"):
+		IsNoProxy = True;
 
 	if (arg == "--help"):
 		Help()
