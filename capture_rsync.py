@@ -154,8 +154,8 @@ def StreamList():
 			Date		= L[3]
 			URL			= L[4]
 
-			TSStart		= default_int(L[6], 0)
-			TSEnd		= default_int(L[7], TSStart)
+			TSStart		= default_int(L[5], 0)
+			TSEnd		= default_int(L[6], TSStart)
 
 			List.append( { "Name": Name, "Bytes":Bytes, "Packets":Packets, "Date":Date, "URL":URL, "TS":TSStart, "TSStart":TSStart, "TSEnd":TSEnd } )
 			#print FileName
@@ -562,7 +562,10 @@ elif (CaptureName != None):
 # use the latest capture file
 else:
 	Entry 		= CaptureList[0]
-
+	for Capture in CaptureList:
+		# search for newer capture
+		if (Capture["TSStart"] > Entry["TSEnd"]):
+			Entry 		= Capture
 
 # get capture info 
 View 		= StreamView( Entry["Name"] )
