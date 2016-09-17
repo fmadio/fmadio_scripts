@@ -20,7 +20,7 @@ Options:
  --pass <password>           : HTTP(s) password
  --output <dir>              : output directory (default ./)
  --single                    : downloads capture as a single PCAP)
- --splitmode <splitmode>     : select split mode (default 1GB)
+ --split <splitmode>         : select split mode (default 1GB)
  --splitlist                 : show split options
  --start <HH:MM:SS>          : start time
  --stop  <HH:MM:SS>          : stop time
@@ -47,6 +47,7 @@ Options:
  --date-jp                   : specify a Japanese date YYYYMMDD (also requires start/stop time)
  --date-us                   : specify a US date       MMDDYYYY (also requires start/stop time)
  --date                      : specify a normal date   DDYMMYYY (also requires start/stop time)
+ --noproxy                   : disable use of proxy
  -v                          : verbose output
 
 ```
