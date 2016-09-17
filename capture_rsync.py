@@ -635,6 +635,7 @@ if (IsCompressFast == True) or (IsCompressMax == True):
 
 # intelligent rsync mode  (no filters)
 if (IsFilter == False):
+
 	ShowGood = True 
 	while True:
 
@@ -709,8 +710,9 @@ else:
 					DownloadList[Key] = True 
 					NewList.append(Split)
 
-			# rsync stream list to the output dir
-			StreamFetch(NewList, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
+			# fetch each new stream 
+			for idx,Split in enumerate(NewList):
+				StreamFetch(Split, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
 
 			print("Sleeping...")
 			time.sleep(60)
