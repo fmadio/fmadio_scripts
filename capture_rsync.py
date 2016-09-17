@@ -64,7 +64,7 @@ def Help():
 	print(" --pass <password>           : HTTP(s) password") 
 	print(" --output <dir>              : output directory (default ./)") 
 	print(" --single                    : downloads capture as a single PCAP)") 
-	print(" --splitmode <splitmode>     : select split mode (default 1GB)") 
+	print(" --split <splitmode>         : select split mode (default 1GB)") 
 	print(" --splitlist                 : show split options") 
 	print(" --start <HH:MM:SS>          : start time") 
 	print(" --stop  <HH:MM:SS>          : stop time") 
