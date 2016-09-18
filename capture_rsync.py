@@ -629,6 +629,9 @@ try:
 except:
 	pass
 
+# regressions use this line
+print("OutputDir: %s" % OutputDir)
+
 # decide on filename suffix 
 URLArg = ""
 Suffix = ".pcap"
