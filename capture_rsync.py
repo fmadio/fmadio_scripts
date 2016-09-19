@@ -119,6 +119,7 @@ def CURLCmd( URL, Silent = "-s", Suffix = "" ):
 
 	if (VERBOSE == True):
 		print("\r[%s]\n" % Cmd)
+		sys.stdout.flush()
 
 	List 	= commands.getstatusoutput(Cmd)
 
@@ -220,7 +221,6 @@ def StreamSplit(CaptureName, SplitMode):
 		URL			= L[3]
 
 		List.append({ "Time":Time, "Bytes":Bytes, "Packets":Packets, "URL":URL })
-
 		#print FileName
 
 	return List
@@ -238,8 +238,14 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 		#       Split byte count is is in rounded up multiples of 256KB
 		#       Its in 256KB chunks so the file splitter only looks at 
 		#       the metadata. It does NOT load in actual packet data 
+     	#  2016/9/19:
+		#       Regressions showing delta`s of up to 512KB, thus 
+		#       delta for a good acpture is 512KB now. This is
+	 	#		difference of file size on the final packet of a
+		#		capture only
 		dSize = Split["Bytes"] - Size
-		if (abs(dSize) <= 256*1024):
+		#print(Size, Split["Bytes"], dSize)
+		if (abs(dSize) <= 2*256*1024):
 			#print("file good")
 			IsDownload = False
 			if (ShowGood == True):
@@ -249,7 +255,7 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 
 	# file requires downloading
 	if (IsDownload == True):
-		print "["+FileName+"] Downloading...",
+		print "["+FileName+"] RSync Downloading...",
 		sys.stdout.flush()
 		TS0 = time.time()
 
@@ -270,7 +276,7 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 def StreamFetch(Split, Prefix, FilterArg, Suffix = ""):
 
 	FileName =  Prefix + '_' + Split["Time"] + Suffix
-	print "["+FileName+"] Downloading...",
+	print "["+FileName+"] Fetch Downloading...",
 	sys.stdout.flush()
 	TS0 = time.time()
 
@@ -290,7 +296,7 @@ def StreamFetch(Split, Prefix, FilterArg, Suffix = ""):
 def StreamSingle(StreamName, Prefix, Suffix, StartTime = None, StopTime = None, FilterArg = None):
 
 	FileName =  Prefix + StreamName + Suffix 
-	print "["+StreamName+"] Downloading...\n",
+	print "["+StreamName+"] Single Downloading...\n",
 	sys.stdout.flush()
 	TS0 = time.time()
 
@@ -564,13 +570,14 @@ else:
 	Entry 		= CaptureList[0]
 	for Capture in CaptureList:
 		# search for newer capture
+		print(Capture["Name"], Capture["TSStart"], Entry["TSEnd"])
 		if (Capture["TSStart"] > Entry["TSEnd"]):
 			Entry 		= Capture
+			print("new capture")
 
 # get capture info 
 View 		= StreamView( Entry["Name"] )
 if (ShowSplitList == True):
-
 	print("Split Modes:")
 	for Mode in View:
 		print("   "+Mode["Mode"])
@@ -671,7 +678,7 @@ if (IsFilter == False):
 							Prefix,	
 							ShowGood, 
 							Suffix,
-							URLArg) 
+							URLArg)
 
 		# continoius follow/poll mode ? 
 		if (IsFollow != True):
@@ -683,7 +690,8 @@ if (IsFilter == False):
 			CaptureList 	= StreamList()
 			Entry 			= CaptureList[0]
 
-		time.sleep(60)
+		print("["+time.strftime("%y-%m-%d %H:%M")+"] Follow Mode Sleeping...")
+		time.sleep(10)
 		ShowGood = False
 
 	print("RSync complete")
@@ -721,7 +729,8 @@ else:
 				StreamFetch(Split, OutputDir + "/" + Entry["Name"] + "_", FilterArg, Suffix) 
 
 			print("Sleeping...")
-			time.sleep(60)
+			sys.stdout.flush()
+			time.sleep(5)
 
 	# without follow mode  
 	else:
