@@ -582,7 +582,6 @@ else:
 	Entry 		= CaptureList[0]
 	for Capture in CaptureList:
 		# search for newer capture
-		print(Capture["Name"], Capture["TSStart"], Entry["TSEnd"])
 		if (Capture["TSStart"] > Entry["TSEnd"]):
 			Entry 		= Capture
 			print("new capture")
