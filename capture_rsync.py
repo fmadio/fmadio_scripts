@@ -231,8 +231,21 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 
 	FileName =  Prefix + '_' + Split["Time"] + Suffix
 	IsDownload = True
+
 	try:
 		Size = os.path.getsize(FileName)
+		dSize = Split["Bytes"] - Size
+
+		# 2016/9/24: when compression is enabled the file size delta
+		# will be very large, because it reports the uncompressed size
+		# It uses uncompressed size because the system compresses on
+		# download based on the requested filtering(which could be anything)
+		# Thus it does not know the compressed size when spliting based 
+		# on metadata
+		if (IsCompressFast == True) and (Size > 0):
+			IsDownload = False
+			if (ShowGood == True):
+				print("["+FileName+"] GOOD skipping (compressed)")
 
 		# NOTE* 2016/01/05
 		#       Split byte count is is in rounded up multiples of 256KB
@@ -243,9 +256,7 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 		#       delta for a good acpture is 512KB now. This is
 	 	#		difference of file size on the final packet of a
 		#		capture only
-		dSize = Split["Bytes"] - Size
-		#print(Size, Split["Bytes"], dSize)
-		if (abs(dSize) <= 2*256*1024):
+		elif (abs(dSize) <= 2*256*1024):
 			#print("file good")
 			IsDownload = False
 			if (ShowGood == True):
@@ -349,8 +360,9 @@ def ParseTimeStr(TimeStr):
 # checks if Time is within the specified range 
 # string like this 20151013_07:04:51.992.334.336
 def ParseTimeStrSec(TimeStr):
-	
+
 	s = TimeStr.split("_")
+	D = int(s[0])				
 	p = s[1].split(".")
 	T = p[0].split(":")
 
@@ -358,10 +370,10 @@ def ParseTimeStrSec(TimeStr):
 	Min  = float(T[1]);
 	Sec  = float(T[2]);
 
+	#Time = (D * 24 + (Hour * 60 + Min))*60 + Sec 
 	Time = (Hour * 60 + Min)*60 + Sec 
 
 	return Time
-
 
 #######################################################################################################################
 #######################################################################################################################
