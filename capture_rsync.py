@@ -684,6 +684,12 @@ if (IsFilter == False):
 					print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StartTime)"
 					continue;
 
+			# in follow mode wait for the entry to finish before downloading 
+			# e.g. not the currently capturing file (occours when capture speed < download speed)
+			if (IsFollow == True) and (Split == SplitList[-1]):
+				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (Follow tail)"
+				continue;
+
 			# rsync stream list to the output dir
 			StreamRSync(	Split, 
 							Prefix,	
