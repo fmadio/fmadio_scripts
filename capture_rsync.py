@@ -15,6 +15,7 @@
 import os
 import sys 
 import time 
+import signal
 import math 
 import commands 
 import datetime 
@@ -95,6 +96,21 @@ def Help():
 	print(" -v                          : verbose output") 
 
 	sys.exit(0)
+
+#-------------------------------------------------------------------------------------------------------------
+# ctrl-c exit handler
+IsExit = False
+def sigint_handler(signum, frame):
+	global IsExit
+
+	# force immediate exit 
+	if (IsExit == True):
+		sys.exit(0)
+
+	print('\nCtrl-C Exit Requested\n')
+	IsExit = True;
+
+signal.signal(signal.SIGINT, sigint_handler)
 
 #######################################################################################################################
 #######################################################################################################################
@@ -221,7 +237,7 @@ def StreamSplit(CaptureName, SplitMode):
 		URL			= L[3]
 
 		List.append({ "Time":Time, "Bytes":Bytes, "Packets":Packets, "URL":URL })
-		#print FileName
+		#print Line 
 
 	return List
 
@@ -657,62 +673,97 @@ if (IsCompressFast == True) or (IsCompressMax == True):
 	Suffix = ".pcap.gz"
 	URLArg = "&Compression=fast"
 
+
+#-------------------------------------------------------------------------------------------------------------
+
+def StreamDownload(EntryName, SplitMode, ShowGood, FetchLast):
+
+	# get current split list
+	SplitList 	= StreamSplit(EntryName, SplitMode) 
+
+	# generate numeric time 
+	for Split in SplitList:
+		Split["TimeSec"] = ParseTimeStrSec(Split["Time"])
+
+	for idx,Split in enumerate(SplitList):
+
+		Prefix = OutputDir+ "/" + EntryName + "_"
+
+		#  filter based on time range (if specified)
+		if (StopTime != None) and (Split["TimeSec"] > StopTime):
+			print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StopTime)"
+			continue;
+
+		if (StartTime != None) and (SplitList[idx+1] != None):
+			if (SplitList[idx+1]["TimeSec"] < StartTime):
+				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StartTime)"
+				continue;
+
+		# in follow mode wait for the entry to finish before downloading 
+		# e.g. not the currently capturing file (occours when capture speed < download speed)
+		if (FetchLast == False) and (Split == SplitList[-1]):
+			print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (Follow tail)"
+			continue;
+
+		# rsync stream list to the output dir
+		StreamRSync(	Split, 
+						Prefix,	
+						ShowGood, 
+						Suffix,
+						URLArg)
+
+
+#-------------------------------------------------------------------------------------------------------------
 # intelligent rsync mode  (no filters)
 if (IsFilter == False):
 
 	ShowGood = True 
-	while True:
 
-		# get current split list
-		SplitList 	= StreamSplit( Entry["Name"], SplitView["Mode"])
+	# grab everythingat one time and done
+	if (IsFollow == False):
+		StreamDownload(Entry["Name"], SplitView["Mode"], ShowGood, True)	
 
-		# generate numeric time 
-		for Split in SplitList:
-			Split["TimeSec"] = ParseTimeStrSec(Split["Time"])
+	# follow mode
+	if (IsFollow == True):
+		while True:
 
-		for idx,Split in enumerate(SplitList):
+			# grab everything except the latest split 
+			StreamDownload(Entry["Name"], SplitView["Mode"], ShowGood, False)	
 
-			Prefix = OutputDir+ "/" + Entry["Name"] + "_"
+			# ensure we`re grabbing the last capture when in follow mode
+			# e.g. during midnight roll in follow mode 
+			if (CaptureName == None):	
+				CaptureList 	= StreamList()
 
-			#  filter based on time range (if specified)
-			if (StopTime != None) and (Split["TimeSec"] > StopTime):
-				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StopTime)"
-				continue;
+				# midnight roll occoured
+				if (Entry["Name"] != CaptureList[0]["Name"]):
 
-			if (StartTime != None) and (SplitList[idx+1] != None):
-				if (SplitList[idx+1]["TimeSec"] < StartTime):
-					print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StartTime)"
-					continue;
+					print("Capture Name changed")
+					print(Entry)
+					print(CaptureList[0])
 
-			# in follow mode wait for the entry to finish before downloading 
-			# e.g. not the currently capturing file (occours when capture speed < download speed)
-			if (IsFollow == True) and (Split == SplitList[-1]):
-				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (Follow tail)"
-				continue;
+					# grab everything including the last entry
+					StreamDownload(Entry["Name"], SplitView["Mode"], ShowGood, True)	
 
-			# rsync stream list to the output dir
-			StreamRSync(	Split, 
-							Prefix,	
-							ShowGood, 
-							Suffix,
-							URLArg)
+					# switch to new stream 
+					Entry 			= CaptureList[0]
 
-		# continoius follow/poll mode ? 
-		if (IsFollow != True):
-			break
+			# user requested exit. in follow mode it needs to
+			# download the final pcap
+			if (IsExit == True):
+				print("Follow Ctrl-C")
+				# grab everything including the last entry
+				StreamDownload(Entry["Name"], SplitView["Mode"], ShowGood, True)	
+				break
 
-		# ensure we`re grabbing the last capture when in follow mode
-		# e.g. during midnight roll in follow mode 
-		if (CaptureName == None):	
-			CaptureList 	= StreamList()
-			Entry 			= CaptureList[0]
-
-		print("["+time.strftime("%y-%m-%d %H:%M")+"] Follow Mode Sleeping...")
-		time.sleep(10)
-		ShowGood = False
+			print("["+time.strftime("%y-%m-%d %H:%M")+"] Follow Mode Sleeping...")
+			time.sleep(10)
+			ShowGood = False
 
 	print("RSync complete")
 
+
+#-------------------------------------------------------------------------------------------------------------
 # filters have been applied
 else:
 	# follow mode with filtering requires different code path
