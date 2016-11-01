@@ -629,8 +629,7 @@ if (IsSingleFile == True):
 
 	# convert time into epoch ns 
 	# NOTE: be areful with the timezone as it crosses midnight 
-
-	TSBase = math.floor((Entry["TS"] + utc_offset.seconds * 1e9 ) / (24*60*60*1e9)) * 24*60*60*1e9
+	TSBase = math.floor((Entry["TSEnd"] + utc_offset.seconds * 1e9 ) / (24*60*60*1e9)) * 24*60*60*1e9
 	if (StartTime != None):
 		StartTime = TSBase  + StartTime * 1e9  - utc_offset.seconds*1e9 
 
