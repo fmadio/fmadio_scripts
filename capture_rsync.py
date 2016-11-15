@@ -31,6 +31,7 @@ CURL				= "/usr/bin/curl"
 VERBOSE				= False 
 OUTDIR				= "./"
 SPLIT_MODE			= "split_1GB"
+ZIP7_CMD			= "7z a -an -txz -si -so -m0=lzma2 -mx=9 "			# lzma2 mode at max level to use all CPU`s
 
 CaptureName			= None
 ShowSplitList		= False				# show the split options for the specified capture
@@ -38,7 +39,8 @@ ShowCaptureList 	= False 			# show the list of captures on the device
 IsFollow			= False				# poll / follow mode
 IsFilter			= False				# filter mode
 IsCompressFast		= False				# fast compression mode
-IsCompressMax		= False				# maximum space saving compression mode 
+IsCompressUltra		= False				# use maximum compression  
+IsCompressClient7z	= False				# client size 7z max compression mode 
 IsSingleFile		= False				# download entire capture as a single file
 StartTime			= None				# used for time based capture filtering
 StopTime			= None				# used for time based capture filtering
@@ -50,6 +52,7 @@ IsVLANStrip			= False				# strip vlan header (will loose FCS)
 IsNoProxy			= False				# disable use of http proxy 
 
 FilterArg			= ""				# default filtering args
+CompressClient 		= ""				# default client side compression args (no compress)
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -71,6 +74,7 @@ def Help():
 	print(" --stop  <HH:MM:SS>          : stop time") 
 	print(" --list                      : show all captures on the remote machine") 
 	print(" --compress                  : compress at the source (~1Gbps throughput)") 
+	print(" --compress-xz               : client side compression 7zip maximum level (xz archive)") 
 	print(" --filter <filterop>         : filter option") 
 	print("                             : FilterIPHost=1.2.3.4") 
 	print("                             : FilterIPHost=1.2.3.4/32") 
@@ -124,7 +128,7 @@ def default_int(Str, Default):
 
 #-------------------------------------------------------------------------------------------------------------
 # issue CURL command
-def CURLCmd( URL, Silent = "-s", Suffix = "" ):
+def CURLCmd(URL, Suffix = "", Silent = "-s" ):
 
 	Cmd 	= CURL
 	if (IsNoProxy == True):
@@ -288,7 +292,7 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 
 		URL = Split["URL"] + URLArg
 
-		CURLCmd(URL, ' > "' + FileName + '"') 
+		CURLCmd(URL, CompressClient + ' > "' + FileName + '"') 
 		TS1 = time.time()
 
 		Size = os.path.getsize(FileName)
@@ -488,6 +492,10 @@ while (i < len(sys.argv)):
 	if (arg == "--compress"):
 		IsCompressFast = True;
 
+	if (arg == "--compress-xz"):
+		IsCompressClient7z = True;
+		CompressClient		= " | " + ZIP7_CMD;
+
 	if (arg == "--start"):
 		StartTimeStr = sys.argv[ sys.argv.index(arg) + 1]
 		StartTime = ParseTimeStr( StartTimeStr ) 
@@ -668,10 +676,17 @@ print("OutputDir: %s" % OutputDir)
 # decide on filename suffix 
 URLArg = ""
 Suffix = ".pcap"
-if (IsCompressFast == True) or (IsCompressMax == True):
+if (IsCompressFast == True):
 	Suffix = ".pcap.gz"
 	URLArg = "&Compression=fast"
 
+#if (IsCompressMax == True):
+#	Suffix = ".pcap.gz"
+#	URLArg = "&Compression=max"
+
+if (IsCompressClient7z == True):
+	Suffix = ".pcap.xz"
+	URLArg = ""
 
 #-------------------------------------------------------------------------------------------------------------
 
