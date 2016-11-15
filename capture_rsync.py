@@ -31,7 +31,11 @@ CURL				= "/usr/bin/curl"
 VERBOSE				= False 
 OUTDIR				= "./"
 SPLIT_MODE			= "split_1GB"
-ZIP7_CMD			= "7z a -an -txz -si -so -m0=lzma2 -mx=9 "			# lzma2 mode at max level to use all CPU`s
+#ZIP7_CMD			= "7z a -an -txz -si -so -m0=lzma2 -mx=9 "			# lzma2 mode at max level to use all CPU`s
+																		# this is extremely slow ~ 10Mbps
+ZIP7_CMD			= "7z a -an -txz -si -so -m0=lzma2 -mx=0 "			# lzma2 mode at fastest and use all CPU`s
+																		# results in compression rates of ~ 700-800Mbps 
+																		# on an 8 HWT system
 
 CaptureName			= None
 ShowSplitList		= False				# show the split options for the specified capture
