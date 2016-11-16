@@ -26,7 +26,7 @@ fmadioMibModule MODULE-IDENTITY
 
     ::= { conformance  20 }
 
-    fmadio    OBJECT IDENTIFIER ::= { enterprises 31337 }
+    fmadio    OBJECT IDENTIFIER ::= { enterprises 46891 }
 
     -- textual conventions
 
