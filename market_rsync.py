@@ -259,10 +259,6 @@ MarketDataGroup = {
 {
 	# market data splits
 	"MD" : [		
-		{ "MCGroup" : "239.194.1.1", "Port": 51050, "VLAN" : None, "Prefix" : "TSE_FLEXFULL_FeedA" },	# japan tse flex FULL feed A channel 0 
-		{ "MCGroup" : "239.194.2.1", "Port": 52050, "VLAN" : None, "Prefix" : "TSE_FLEXFULL_FeedB" },	# japan tse flex FULL feed B channel 0 
-		{ "MCGroup" : "239.194.3.1", "Port": 51550, "VLAN" : None, "Prefix" : "TSE_FLEXFULL_FeedA" },	# japan tse flex WB   feed A channel 0 
-		{ "MCGroup" : "239.194.4.1", "Port": 52550, "VLAN" : None, "Prefix" : "TSE_FLEXFULL_FeedB" },	# japan tse flex WB   feed B channel 0 
 	],
 	# include order/entry ip`s
     "OE" : [
