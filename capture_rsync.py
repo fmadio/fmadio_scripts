@@ -353,7 +353,7 @@ def StreamSingle(StreamName, Prefix, Suffix, StartTime = None, StopTime = None, 
 		URL = URL + FilterArg
 
 	# use os.system so stderr outputs the progress bar
-	Cmd 	= CURL + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + ' > "' + FileName + '"' 
+	Cmd 	= CURL + ' -u ' + USERNAME + ':' + PASSWORD + ' "'+PROTOCOL+'://'+HOSTNAME+'/'+URL+'"' + CompressClient + ' > "' + FileName + '"' 
 	if (VERBOSE == True):
 		print(Cmd)
 
@@ -629,6 +629,9 @@ if (IsSingleFile == True):
 	if (IsCompressFast == True):
 		print("Single PCAP Compressed")
 		Suffix = ".pcap.gz"
+	elif (IsCompressClient7z == True):
+		print("Single PCAP Compressed 7z")
+		Suffix = ".pcap.xz"
 	else:
 		print("Single PCAP")
 
