@@ -1,4 +1,4 @@
-#!/usr/bin/lua
+#!/usr/bin/lua5.2
 -- 
 --  generates nagios_xi services generation file 
 --
@@ -26,7 +26,9 @@ local a = 1
 while a <= #arg do 
 	local b = arg[a]
 
-	if (b == "--fmadio20-1u-16t") 	then DeviceTarget = "fmadio20" end
+	print(b)
+
+	if (b == "--fmad20-1u-16t") 	then DeviceTarget = "fmadio20" end
 	if (b == "--host") 				then Host = arg[a+1]; a = a + 1; end 
 	if (b == "--help") 				then Help(); return end 
 
