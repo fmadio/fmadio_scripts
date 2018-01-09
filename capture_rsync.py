@@ -257,7 +257,7 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 	IsDownload = True
 
 	try:
-		Size = os.path.getsize(FileName)
+		Size  = os.path.getsize(FileName)
 		dSize = Split["Bytes"] - Size
 
 		# 2016/9/24: when compression is enabled the file size delta
@@ -280,7 +280,10 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 		#       delta for a good acpture is 512KB now. This is
 	 	#		difference of file size on the final packet of a
 		#		capture only
-		elif (abs(dSize) <= 2*256*1024):
+		# 2018/01/09
+		#       for use with 20F the filesystem V2 the deltas
+		#       can be quite a bit more. change to up to 16MB
+		elif (abs(dSize) <= 16*1024*1024):
 			#print("file good")
 			IsDownload = False
 			if (ShowGood == True):
