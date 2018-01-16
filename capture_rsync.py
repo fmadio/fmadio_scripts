@@ -253,7 +253,7 @@ def StreamSplit(CaptureName, SplitMode):
 #  rsync the stream capture files
 def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 
-	FileName =  Prefix + '_' + Split["Time"] + Suffix
+	FileName =  Prefix + Split["Time"] + Suffix
 	IsDownload = True
 
 	try:
@@ -313,7 +313,7 @@ def StreamRSync(Split, Prefix, ShowGood=True, Suffix="", URLArg = ""):
 #  rsync the stream capture files
 def StreamFetch(Split, Prefix, FilterArg, Suffix = ""):
 
-	FileName =  Prefix + '_' + Split["Time"] + Suffix
+	FileName =  Prefix + Split["Time"] + Suffix
 	print "["+FileName+"] Fetch Downloading...",
 	sys.stdout.flush()
 	TS0 = time.time()
@@ -711,22 +711,22 @@ def StreamDownload(EntryName, SplitMode, ShowGood, FetchLast):
 
 	for idx,Split in enumerate(SplitList):
 
-		Prefix = OutputDir+ "/" + EntryName + "_"
+		Prefix = OutputDir+ "/" 
 
 		#  filter based on time range (if specified)
 		if (StopTime != None) and (Split["TimeSec"] > StopTime):
-			print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StopTime)"
+			print "["+Prefix + Split["Time"] + Suffix + "] Skip (StopTime)"
 			continue;
 
 		if (StartTime != None) and (SplitList[idx+1] != None):
 			if (SplitList[idx+1]["TimeSec"] < StartTime):
-				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StartTime)"
+				print "["+Prefix + Split["Time"] + Suffix + "] Skip (StartTime)"
 				continue;
 
 		# in follow mode wait for the entry to finish before downloading 
 		# e.g. not the currently capturing file (occours when capture speed < download speed)
 		if (FetchLast == False) and (Split == SplitList[-1]):
-			print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (Follow tail)"
+			print "["+Prefix + Split["Time"] + Suffix + "] Skip (Follow tail)"
 			continue;
 
 		# rsync stream list to the output dir
@@ -786,7 +786,6 @@ if (IsFilter == False):
 
 	print("RSync complete")
 
-
 #-------------------------------------------------------------------------------------------------------------
 # filters have been applied
 else:
@@ -840,12 +839,12 @@ else:
 
 			#  filter based on time range (if specified)
 			if (StopTime != None) and (Split["TimeSec"] > StopTime):
-				print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StopTime)"
+				print "["+Prefix + Split["Time"] + Suffix + "] Skip (StopTime)"
 				continue;
 
 			if (StartTime != None) and (len(SplitList) > idx + 1) and (SplitList[idx+1] != None):
 				if (SplitList[idx+1]["TimeSec"] < StartTime):
-					print "["+Prefix + "_" + Split["Time"] + Suffix + "] Skip (StartTime)"
+					print "["+Prefix + Split["Time"] + Suffix + "] Skip (StartTime)"
 					continue;
 
 			# download 
